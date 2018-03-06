@@ -1,0 +1,11 @@
+Package: kinesis
+Type: Package
+Title: Package for the analysis of motion trajectories and movement kinematics
+Version: 0.1.1
+Author: Carlo Campagnoli
+Maintainer: Carlo Campagnoli <carlo.campagnoli@princeton.edu>
+Description: TODO
+License: CC
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
