@@ -1,4 +1,4 @@
-#' Load and update all the required libraries of the shapelab package
+#' Load and update all the required libraries of the kinesis package
 #' @param update if TRUE, the function also updates the libraries to newest version (FALSE by default)
 #' @export
 libraries <- function(update=F)

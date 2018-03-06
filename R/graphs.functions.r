@@ -257,7 +257,7 @@ view.single.trial.grasp3d.anim <- function(tr, datatraj, datakin, entireMov=F, t
            xlab="X", ylab="Z", zlab="Y",
            xlim=c(minx,maxx), ylim=c(minz,maxz), zlim=c(miny,maxy),
            type='n')
-    for(i in cc.min(datatraj.trial$frameN):subset(datakin, trialN==tr)$frameToFGA)
+    for(i in kin.min(datatraj.trial$frameN):subset(datakin, trialN==tr)$frameToFGA)
     {
       if(!is.na(datatraj.trial["indexX"][i,]))
       {
@@ -274,7 +274,7 @@ view.single.trial.grasp3d.anim <- function(tr, datatraj, datakin, entireMov=F, t
 
     if(entireMov)
     {
-      for(i in (i+1):cc.max(datatraj.trial$frameN))
+      for(i in (i+1):kin.max(datatraj.trial$frameN))
       {
         if(!is.na(datatraj.trial["indexX"][i,]))
         {
@@ -297,7 +297,7 @@ view.single.trial.grasp3d.anim <- function(tr, datatraj, datakin, entireMov=F, t
            xlab="X", ylab="Z", zlab="Y",
            xlim=c(minx,maxx), ylim=c(minz,maxz), zlim=c(miny,maxy),
            type='n')
-    for(i in cc.min(datatraj.trial$frameN):datakin.trial$frameToFGA)
+    for(i in kin.min(datatraj.trial$frameN):datakin.trial$frameToFGA)
     {
       if(is.na(datatraj.trial["indexX"][i,])==F)
       {
@@ -312,7 +312,7 @@ view.single.trial.grasp3d.anim <- function(tr, datatraj, datakin, entireMov=F, t
     }
     if(entireMov)
     {
-      for(i in (i+1):cc.max(datatraj.trial$frameN))
+      for(i in (i+1):kin.max(datatraj.trial$frameN))
       {
         if(is.na(datatraj.trial["indexX"][i,])==F)
         {

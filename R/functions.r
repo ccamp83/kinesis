@@ -1,18 +1,17 @@
-####################################################################################	1.
+# lengthunique ----
 #' @export
 lengthunique <- function(x){
 	length(unique(x))
 }
 
-####################################################################################  2.
-
+# kin.min & kin.max ----
 # min and max functions with na.rm = TRUE by default (for usage in ddply and graphs)
 #' @export
 kin.min <- function(x) { min(x, na.rm=T) }
 #' @export
 kin.max <- function(x) { max(x, na.rm=T) }
 
-####################################################################################  3.
+# lmax.locate ----
 # function to locate the local maxima (used in kin.extract)
 #' @export
 lmax.locate <- function(x, y)
@@ -21,12 +20,12 @@ lmax.locate <- function(x, y)
   return(x %in% x[lmaxmin])
 }
 
-####################################################################################  4.
+# kin.mean ----
 # mean without NAs by default
 #' @export
 kin.mean <- function(x) {mean(x, na.rm=T)}
 
-####################################################################################  5.
+# sortdataframe ----
 # function to sort a data.frame by column(s) name or number
 #' @export
 sortdataframe <- function(x, decreasing=FALSE, by=1, ... ){
@@ -35,7 +34,7 @@ sortdataframe <- function(x, decreasing=FALSE, by=1, ... ){
   x[i,,drop=FALSE]
 }
 
-####################################################################################  17.
-# standard error (from package sciplot)
+# kin.se ----
+# standard error calculation
 #' @export
-se <- function (x, na.rm = TRUE) {sqrt(var(x, na.rm = na.rm)/length(x[complete.cases(x)]))}
+kin.se <- function (x, na.rm = TRUE) {sqrt(var(x, na.rm = na.rm)/length(x[complete.cases(x)]))}
