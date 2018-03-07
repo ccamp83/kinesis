@@ -1,7 +1,7 @@
 #' Check the data file and provide fixes if available
 #' @param dataset an object of the type data.frame
 #' @param refreshRate the refresh rate used during the motion capture (in hertz)
-#' @param time.unit the unit of measurement in which time is expressed in the 'time' column of the dataset given to the function. 1 = seconds, 10 = deciseconds, 100 = centiseconds, 1000 = milliseconds, ...
+#' @param time.unit the unit of measurement in which time is expressed in the 'time' column of the dataset given to the function. 1 = seconds, 10 = deciseconds, 100 = centiseconds, 1000 = milliseconds, ... Default to 1000
 #' @examples
 #' libraries()
 #'

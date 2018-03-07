@@ -1,6 +1,6 @@
 # functions to fix dataset
 
-# 5. trialN from 1 to N
+# kin.trialN: trialN from 1 to N ----
 #' @export
 kin.trialN <- function(dataset)
 {
@@ -21,7 +21,7 @@ kin.trialN <- function(dataset)
   return(dataset)
 }
 
-# 6. frameN generator: frames counter
+# kin.frameN: frames counter ----
 #' @export
 kin.frameN <- function(dataset)
 {
@@ -29,20 +29,20 @@ kin.frameN <- function(dataset)
   return(dataset)
 }
 
-# 7. fingersOccluded generator: flag the frames where either of the two fingers is invisible
+# kin.fingersOccluded: flag the frames where either of the two fingers is invisible ----
 #' @export
 kin.fingersOccluded <- function(dataset)
 {
   datatemp <- ddply(dataset, .(trialN), mutate,
                     indexVisibility=c(-999,abs(diff(indexXraw))),
                     thumbVisibility=c(-999,abs(diff(thumbXraw))),
-                    indexXraw = ifelse(indexVisibility==0.000000,NA,indexXraw),
-                    indexYraw = ifelse(indexVisibility==0.000000,NA,indexYraw),
-                    indexZraw = ifelse(indexVisibility==0.000000,NA,indexZraw),
-                    thumbXraw = ifelse(thumbVisibility==0.000000,NA,thumbXraw),
-                    thumbYraw = ifelse(thumbVisibility==0.000000,NA,thumbYraw),
-                    thumbZraw = ifelse(thumbVisibility==0.000000,NA,thumbZraw),
-                    fingersOccluded=ifelse(indexVisibility*thumbVisibility==0.000000,1,0) # if the increment is exactly zero, two frames have exactly the same coordinate, which means that the marker was not recorded
+                    indexXraw = ifelse(indexVisibility<0.000001,NA,indexXraw),
+                    indexYraw = ifelse(indexVisibility<0.000001,NA,indexYraw),
+                    indexZraw = ifelse(indexVisibility<0.000001,NA,indexZraw),
+                    thumbXraw = ifelse(thumbVisibility<0.000001,NA,thumbXraw),
+                    thumbYraw = ifelse(thumbVisibility<0.000001,NA,thumbYraw),
+                    thumbZraw = ifelse(thumbVisibility<0.000001,NA,thumbZraw),
+                    fingersOccluded=ifelse(indexVisibility*thumbVisibility<0.000001,1,0) # if the increment is exactly zero, two frames have exactly the same coordinate, which means that the marker was not recorded
   )
   # update fingers raw coords
   dataset$indexXraw <- datatemp$indexXraw
@@ -55,7 +55,7 @@ kin.fingersOccluded <- function(dataset)
   return(dataset)
 }
 
-# 8. framesOccluded generator: incremental counter of occluded frames within each trial
+# kin.framesOccluded: incremental counter of occluded frames within each trial ----
 #' @export
 kin.framesOccluded <- function(dataset)
 {
@@ -63,7 +63,7 @@ kin.framesOccluded <- function(dataset)
   return(dataset)
 }
 
-# 9. time generator: multiplies each frame by a constant equal to the (nominal) refresh rate of the screen (Warning: this is just an artificial fix, actual refresh rate is variable - always make sure that actual time steps are in the original output file)
+# kin.time: multiplies each frame by a constant equal to the (nominal) refresh rate of the screen (Warning: this is just an artificial fix, actual refresh rate is variable - always make sure that actual time steps are in the original output file) ----
 #' @export
 kin.time <- function(dataset, refreshRate = 85)
 {
@@ -75,7 +75,7 @@ kin.time <- function(dataset, refreshRate = 85)
   return(dataset)
 }
 
-# recovery global time
+# kin.globalTime ----
 #' @export
 kin.globalTime <- function(dataset)
 {

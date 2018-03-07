@@ -1,6 +1,7 @@
 # functions to smooth, derive and rescale kinematics
 # they exploit built-in r functions, to be applied with ddply
 
+# kin.smooth ----
 #' smooth data points.
 #' @param x: predictor
 #' @param  y: variable to be smoothed
@@ -11,6 +12,7 @@ kin.smooth <- function(x,y,l=.2){
   return(predict(fit, x))
 }
 
+# kin.derive ----
 #' smooth then calculate derivatives of a given variable with respect to a specific predictor. Inputs:
 #' @param x: predictor
 #' @param y: variable to be smoothed
@@ -19,6 +21,7 @@ kin.smooth <- function(x,y,l=.2){
 #' @export
 kin.derive <- function(x,y,l=.2,d){predict(sreg(x,y,lambda=l), deriv=d)[match(x,sreg(x,y, lambda=l)$x)]}
 
+# kin.rescale ----
 #' rescale the values of a vector within a specified range. Inputs:
 #' @param x: vector to be rescaled
 #' @param a: range minimum
@@ -28,6 +31,7 @@ kin.rescale <- function(x,a,b) {
   rg <- c(a,b)
   rescale(x, to = rg, from = range(x, na.rm = TRUE)) }
 
+# kin.smooth.repair ----
 #' @export
 kin.smooth.repair <- function(x, y.raw, lam = .0005, maxFrames = 18, fingersOccluded, framesOccluded)
 {
@@ -80,8 +84,7 @@ kin.smooth.repair <- function(x, y.raw, lam = .0005, maxFrames = 18, fingersOccl
   }
 }
 
-####################################################################################  13.
-# function to smooth the GA (used in kin.SmoothAndDerive)
+# kin.GA.smooth.repair ----
 #' @export
 kin.GA.smooth.repair <- function(x, y, trialN, lam = 1e-04, maxFrames = 17, fingersOccluded, framesOccluded, n.lmax, n.lmax.lim = 60)
 {
