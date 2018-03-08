@@ -1,3 +1,5 @@
+options(scipen = 1, digits = 3)
+
 libraries()
 
 # PROCEDURE FROM GALLIVAN  and CHAPMAN 2014
@@ -13,6 +15,10 @@ testData <- kin.fingersOccluded(testData)
 any(testData$fingersOccluded==1) # YES
 # count frames with missing data
 testData <- kin.framesOccluded(testData)
+# create column for frame time (refresh rate)
+testTrial$frameT <- 1/85
+# create time column assuming constant 85Hz sampling
+testTrial$time <- testTrial$frameN * testTrial$frameT
 
 #### 1. individual trial analysis ####
 ###  1.1 extract ROI ----
@@ -36,25 +42,53 @@ ggplot(aes(frameN, indexXraw, color = fingersOccluded), data = testTrial) + geom
 max(testTrial$framesOccluded) # 18
 
 # repair missing frames
-testTrial$thumbX <- with(testTrial, kin.smooth.repair(frameN,thumbXraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
-ggplot(aes(frameN, thumbX, color = fingersOccluded), data = testTrial) + geom_point() # thumb data is bad
+testTrial$thumbXrep <- with(testTrial, kin.smooth.repair(frameN,thumbXraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+testTrial$thumbYrep <- with(testTrial, kin.smooth.repair(frameN,thumbYraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+testTrial$thumbZrep <- with(testTrial, kin.smooth.repair(frameN,thumbZraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+ggplot(aes(frameN, thumbXrep, color = fingersOccluded), data = testTrial) + geom_point() # thumb data is bad
 
 ##   1.1.2 butterworth filter ----
 # dual pass, 8–12 Hz cutoff, 2nd order
-testTrial$thumbXbw <- with(testTrial, kin.bwFilter(thumbX, cutoff_freq = 10, type = "pass"))
+testTrial$thumbX <- with(testTrial, kin.bwFilter(thumbXrep, cutoff_freq = 10, type = "pass"))
+testTrial$thumbY <- with(testTrial, kin.bwFilter(thumbYrep, cutoff_freq = 10, type = "pass"))
+testTrial$thumbZ <- with(testTrial, kin.bwFilter(thumbZrep, cutoff_freq = 10, type = "pass"))
 
 ggplot(data = testTrial) +
   geom_point(aes(frameN, thumbX), color = "black") +
   geom_point(aes(frameN, thumbXbw), color = "red")
 
 ##   1.1.3 translate and rotate to have all trajectories going in the same direction ----
+testTrial$thumbZ <- testTrial$thumbZ*-1
+
 ##   1.1.4 find movement onset ----
 #    1.1.4.1 calculate velocity vector ----
-#    1.1.4.2 butterworth filter velocitiy vector ----
+testTrial$thumbXvel <- with(testTrial, kin.derive(frameN,thumbX,d=1) / frameT)
+testTrial$thumbYvel <- with(testTrial, kin.derive(frameN,thumbY,d=1) / frameT)
+testTrial$thumbZvel <- with(testTrial, kin.derive(frameN,thumbZ,d=1) / frameT)
+testTrial$thumbVel <- with(testTrial, sqrt(thumbXvel^2 + thumbYvel^2 + thumbZvel^2)) # in mm/s
+
+#    1.1.4.2 butterworth filter velocitiy and accelleration vectors ----
 # dual pass, 8–12 Hz cutoff, 2nd order
+testTrial$thumbVel <- with(testTrial, kin.bwFilter(thumbVel, cutoff_freq = 10, type = "pass"))
+testTrial$thumbAcc <- with(testTrial, kin.derive(frameN,thumbVel,d=1) / frameT)
+testTrial$thumbAcc <- with(testTrial, kin.bwFilter(thumbAcc, cutoff_freq = 10, type = "pass"))
+
+ggplot(data = testTrial) +
+  geom_point(aes(time, thumbXvel), color = "red") +
+  geom_point(aes(time, thumbYvel), color = "darkgreen") +
+  geom_point(aes(time, thumbZvel), color = "blue") +
+  geom_point(aes(time, thumbVel), color = "black")
+
 #    1.1.4.3 set onset frame ----
 # set the onset frame to be the first of four consecutive vector velocity readings of greater than 20 mm/s
-# in which there was a total acceleration of 20 mm/s2 across the four points.
+# in which
+
+# crop trajectory where velocity is < 20 mm/s
+onsetData <- testTrial[,c("frameN","thumbVel","thumbAcc")]
+onsetData$travel <- with(onsetData, thumbVel > 20)
+with(onsetData, split(thumbVel, travel))
+
+
 ##   1.1.5 find movement offset ----
 # We set the offset frame to be whichever of two events occurs first: the frame containing the maximum position value in
 # the direction of the reach (i.e., the max reach extent) or the first frame in which the velocity drops below 20 mm/s.
