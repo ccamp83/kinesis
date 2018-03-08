@@ -41,6 +41,11 @@ ggplot(aes(frameN, thumbX, color = fingersOccluded), data = testTrial) + geom_po
 
 ##   1.1.2 butterworth filter ----
 # dual pass, 8–12 Hz cutoff, 2nd order
+testTrial$thumbXbw <- with(testTrial, kin.bwFilter(thumbX, cutoff_freq = 10, type = "pass"))
+
+ggplot(data = testTrial) +
+  geom_point(aes(frameN, thumbX), color = "black") +
+  geom_point(aes(frameN, thumbXbw), color = "red")
 
 ##   1.1.3 translate and rotate to have all trajectories going in the same direction ----
 ##   1.1.4 find movement onset ----

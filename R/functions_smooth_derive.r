@@ -117,3 +117,4 @@ kin.GA.smooth.repair <- function(x, y, trialN, lam = 1e-04, maxFrames = 17, fing
   } else
     return(y)
 }
+

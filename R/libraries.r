@@ -9,28 +9,15 @@ libraries <- function(update=F)
   # list of the required packages
   reqPackages <- c(
     "Hmisc",
-    "plyr", # arrange dataset
-    "ggplot2", # generate plots
-    #"lme4",
-    # "RCurl", # ubuntu 14.04 requires "sudo apt-get install libcurl4-gnutls-dev" to install this package
-    "fields", # sreg function for smoothing
-    "gridExtra", # generate plots
-    "grid", # generate plots
-    "rgl", # opengl - ubuntu 14.04 requires "sudo apt-get install libX11-dev freeglut3 freeglut3-dev libxml2-dev" to install this package
-    #"grDevices",
-    #"car",
-    #"phia",
-    #"gtools",
-    #"lattice",
-    "roxygen2", # generate package
-    #"AICcmodavg",
-    #"reshape2",
-    #"fpc",
-    #"pbkrtest",
-    #"clusterGeneration", # rcorrmatrix
-    #"DescTools",
-    "parallel" # parallel computing
-    #"mvtnorm"
+    "plyr",         # arrange dataset
+    "ggplot2",      # generate plots
+    "fields",       # sreg function for smoothing
+    "gridExtra",    # generate plots
+    "grid",         # generate plots
+    "rgl",          # opengl - ubuntu 14.04 requires "sudo apt-get install libX11-dev freeglut3 freeglut3-dev libxml2-dev" to install this package
+    "roxygen2",     # generate package
+    "parallel",     # parallel computing
+    "signal"        # butterworth filter
   )
 
   # check which of the required libraries have to be installed
