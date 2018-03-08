@@ -26,7 +26,7 @@ testData <- ddply(testData, .(trialN), mutate,
 # extract these trials number
 trial.na.frame <- unique(subset(testData, missing.frames)$trialN)
 # pick a random bad trial
-badTrialNum <- 38
+badTrialNum <- 40
 testTrial <- subset(testData, trialN == badTrialNum)
 # plot the data
 ggplot(aes(frameN, thumbXraw, color = fingersOccluded), data = testTrial) + geom_point() # thumb data is bad
