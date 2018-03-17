@@ -43,14 +43,23 @@ ggplot(aes(frameN, indexXraw, color = fingersOccluded), data = testTrial) + geom
 max(testTrial$framesOccluded) # 15
 
 # repair missing frames
+testTrial$indexXrep <- with(testTrial, kin.smooth.repair(frameN,indexXraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+testTrial$indexYrep <- with(testTrial, kin.smooth.repair(frameN,indexYraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+testTrial$indexZrep <- with(testTrial, kin.smooth.repair(frameN,indexZraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+
 testTrial$thumbXrep <- with(testTrial, kin.smooth.repair(frameN,thumbXraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
 testTrial$thumbYrep <- with(testTrial, kin.smooth.repair(frameN,thumbYraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
 testTrial$thumbZrep <- with(testTrial, kin.smooth.repair(frameN,thumbZraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+
 ggplot(aes(frameN, thumbXrep, color = fingersOccluded), data = testTrial) + geom_point() # thumb data is bad
 
 ##   1.1.2 filter ----
 #    1.1.2.1 butterworth filter ----
 # dual pass, 8–12 Hz cutoff, 2nd order
+testTrial$indexXbw <- with(testTrial, kin.bwFilter(indexXrep, cutoff_freq = 10, type = "pass"))
+testTrial$indexYbw <- with(testTrial, kin.bwFilter(indexYrep, cutoff_freq = 10, type = "pass"))
+testTrial$indexZbw <- with(testTrial, kin.bwFilter(indexZrep, cutoff_freq = 10, type = "pass"))
+
 testTrial$thumbXbw <- with(testTrial, kin.bwFilter(thumbXrep, cutoff_freq = 10, type = "pass"))
 testTrial$thumbYbw <- with(testTrial, kin.bwFilter(thumbYrep, cutoff_freq = 10, type = "pass"))
 testTrial$thumbZbw <- with(testTrial, kin.bwFilter(thumbZrep, cutoff_freq = 10, type = "pass"))
@@ -61,9 +70,13 @@ ggplot(data = testTrial) +
 
 #    1.1.2.2 Savitzky-Golay filter ----
 # 3rd order
-testTrial$thumbXsg <- with(testTrial, kin.sgFilter(thumbXrep))
-testTrial$thumbYsg <- with(testTrial, kin.sgFilter(thumbYrep))
-testTrial$thumbZsg <- with(testTrial, kin.sgFilter(thumbZrep))
+testTrial$indexXsg <- with(testTrial, kin.sgFilter(indexXrep, ts = 1/85))
+testTrial$indexYsg <- with(testTrial, kin.sgFilter(indexYrep, ts = 1/85))
+testTrial$indexZsg <- with(testTrial, kin.sgFilter(indexZrep, ts = 1/85))
+
+testTrial$thumbXsg <- with(testTrial, kin.sgFilter(thumbXrep, ts = 1/85))
+testTrial$thumbYsg <- with(testTrial, kin.sgFilter(thumbYrep, ts = 1/85))
+testTrial$thumbZsg <- with(testTrial, kin.sgFilter(thumbZrep, ts = 1/85))
 
 ggplot(data = testTrial) +
   geom_point(aes(frameN, thumbXrep), color = "black") +
@@ -71,27 +84,53 @@ ggplot(data = testTrial) +
 
 #    1.2.2.3 choose filter and apply ----
 # savitzky-golay filter is less invasive than butterworth (less variable residuals)
+qplot(indexXbw-indexXrep, indexXsg-indexXrep, data=testTrial, geom="point") + coord_fixed()
 qplot(thumbXbw-thumbXrep, thumbXsg-thumbXrep, data=testTrial, geom="point") + coord_fixed()
+
+testTrial$indexX <- testTrial$indexXsg
+testTrial$indexY <- testTrial$indexYsg
+testTrial$indexZ <- testTrial$indexZsg
 
 testTrial$thumbX <- testTrial$thumbXsg
 testTrial$thumbY <- testTrial$thumbYsg
 testTrial$thumbZ <- testTrial$thumbZsg
 
-##   1.1.3 translate and rotate to have all trajectories going in the same direction ----
-testTrial$thumbZ <- testTrial$thumbZ*-1
+##   1.1.3 find start and end of movement (if unknown)
+# rationale: there will be many more samples around start and end of movement
+# because of the low speed of motion
+# hence the distribution of x, y and z positions should be highly bimodal
+# we use cluster analysis to find the centroids of the two clusters (start & end)
+# of each position of each finger
+km.res <- as.data.frame(kmeans(na.omit(testTrial)[,c("time","indexX","indexY","indexZ","thumbX","thumbY","thumbZ")], 2)$centers)
+km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
+
+##   1.1.4 translate and rotate to have all trajectories going in the same direction ----
+# if the centroid of the z coord of either finger is more negative in the second cluster (the latest) than in the first
+# then the forward direction (the z axis) is reversed, so we need to flip the z values
+# so that the forward direction becomes positive
+ind.Zdir <- with(km.res, indexZ[moment=="end"]) - with(km.res, indexZ[moment=="start"])
+thu.Zdir <- with(km.res, thumbZ[moment=="end"]) - with(km.res, thumbZ[moment=="start"])
+if(ind.Zdir < 0)
+  testTrial$indexZ <- testTrial$indexZ*-1
+if(thu.Zdir < 0)
+  testTrial$thumbZ <- testTrial$thumbZ*-1
 
 ##   1.1.4 find movement onset ----
 #    1.1.4.1 calculate velocity vector ----
-testTrial$thumbXvel <- with(testTrial, kin.derive(frameN,thumbX,d=1) / frameT)
-testTrial$thumbYvel <- with(testTrial, kin.derive(frameN,thumbY,d=1) / frameT)
-testTrial$thumbZvel <- with(testTrial, kin.derive(frameN,thumbZ,d=1) / frameT)
-testTrial$thumbVel <- with(testTrial, sqrt(thumbXvel^2 + thumbYvel^2 + thumbZvel^2)) # in mm/s
+# using Savitzy-Golay filter (remember the frame rate!!)
+testTrial$thumbXvel <- with(testTrial, kin.sgFilter(thumbX,m=1, ts = 1/85))
+testTrial$thumbYvel <- with(testTrial, kin.sgFilter(thumbY,m=1, ts = 1/85))
+testTrial$thumbZvel <- with(testTrial, kin.sgFilter(thumbZ,m=1, ts = 1/85))
+testTrial$thumbvel <- with(testTrial, sqrt(thumbXvel^2 + thumbYvel^2 + thumbZvel^2)) # in mm/s
 
-#    1.1.4.2 butterworth filter velocitiy and accelleration vectors ----
-# dual pass, 8–12 Hz cutoff, 2nd order
-testTrial$thumbVel <- with(testTrial, kin.bwFilter(thumbVel, cutoff_freq = 10, type = "pass"))
-testTrial$thumbAcc <- with(testTrial, kin.derive(frameN,thumbVel,d=1) / frameT)
-testTrial$thumbAcc <- with(testTrial, kin.bwFilter(thumbAcc, cutoff_freq = 10, type = "pass"))
+#    1.1.4.2 Savitzky-Golay filter velocitiy and acceleration vectors ----
+# 3rd order
+# filter velocity
+testTrial$thumbVel <- with(testTrial, kin.sgFilter(thumbVel, ts = 1/85))
+# derive acceleration
+testTrial$thumbAcc <- with(testTrial, kin.sgFilter(thumbVel, m=1, ts = 1/85))
+# filter acceleration
+testTrial$thumbAcc <- with(testTrial, kin.sgFilter(thumbAcc, ts = 1/85))
 
 ggplot(data = testTrial) +
   geom_point(aes(time, thumbXvel), color = "red") +
@@ -100,7 +139,7 @@ ggplot(data = testTrial) +
   geom_point(aes(time, thumbVel), color = "black")
 
 #    1.1.4.3 set onset frame ----
-# set the onset frame to be the first of four consecutive vector velocity readings of greater than 20 mm/s
+# set the onset frame to be the first of four consecutive vector velocity readings of greater than a threshold
 # in which
 
 # crop trajectory where velocity is < 20 mm/s
