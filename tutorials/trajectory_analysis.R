@@ -1,8 +1,9 @@
 options(scipen = 1, digits = 3)
 
 libraries()
+library(cowplot)
 
-# PROCEDURE FROM GALLIVAN  and CHAPMAN 2014
+# PROCEDURE FROM GALLIVAN and CHAPMAN 2014
 
 #### Prepare the dataset ####
 # keep only useful columns
@@ -16,9 +17,9 @@ any(testData$fingersOccluded==1) # YES
 # count frames with missing data
 testData <- kin.framesOccluded(testData)
 # create column for frame time (refresh rate)
-testTrial$frameT <- 1/85
+testData$frameT <- 1/85
 # create time column assuming constant 85Hz sampling
-testTrial$time <- testTrial$frameN * testTrial$frameT
+testData$time <- testData$frameN * testData$frameT
 
 #### 1. individual trial analysis ####
 ###  1.1 extract ROI ----
@@ -39,7 +40,7 @@ ggplot(aes(frameN, thumbXraw, color = fingersOccluded), data = testTrial) + geom
 ggplot(aes(frameN, indexXraw, color = fingersOccluded), data = testTrial) + geom_point() # index data is OK
 
 # how many bad frame are there?
-max(testTrial$framesOccluded) # 18
+max(testTrial$framesOccluded) # 15
 
 # repair missing frames
 testTrial$thumbXrep <- with(testTrial, kin.smooth.repair(frameN,thumbXraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
@@ -47,15 +48,34 @@ testTrial$thumbYrep <- with(testTrial, kin.smooth.repair(frameN,thumbYraw, lam =
 testTrial$thumbZrep <- with(testTrial, kin.smooth.repair(frameN,thumbZraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
 ggplot(aes(frameN, thumbXrep, color = fingersOccluded), data = testTrial) + geom_point() # thumb data is bad
 
-##   1.1.2 butterworth filter ----
+##   1.1.2 filter ----
+#    1.1.2.1 butterworth filter ----
 # dual pass, 8–12 Hz cutoff, 2nd order
-testTrial$thumbX <- with(testTrial, kin.bwFilter(thumbXrep, cutoff_freq = 10, type = "pass"))
-testTrial$thumbY <- with(testTrial, kin.bwFilter(thumbYrep, cutoff_freq = 10, type = "pass"))
-testTrial$thumbZ <- with(testTrial, kin.bwFilter(thumbZrep, cutoff_freq = 10, type = "pass"))
+testTrial$thumbXbw <- with(testTrial, kin.bwFilter(thumbXrep, cutoff_freq = 10, type = "pass"))
+testTrial$thumbYbw <- with(testTrial, kin.bwFilter(thumbYrep, cutoff_freq = 10, type = "pass"))
+testTrial$thumbZbw <- with(testTrial, kin.bwFilter(thumbZrep, cutoff_freq = 10, type = "pass"))
 
 ggplot(data = testTrial) +
-  geom_point(aes(frameN, thumbX), color = "black") +
-  geom_point(aes(frameN, thumbXbw), color = "red")
+  geom_point(aes(frameN, thumbXrep), color = "black") +
+  geom_point(aes(frameN, thumbXbw), color = "red", alpha=.5)
+
+#    1.1.2.2 Savitzky-Golay filter ----
+# 3rd order
+testTrial$thumbXsg <- with(testTrial, kin.sgFilter(thumbXrep))
+testTrial$thumbYsg <- with(testTrial, kin.sgFilter(thumbYrep))
+testTrial$thumbZsg <- with(testTrial, kin.sgFilter(thumbZrep))
+
+ggplot(data = testTrial) +
+  geom_point(aes(frameN, thumbXrep), color = "black") +
+  geom_point(aes(frameN, thumbXsg), color = "green", alpha=.5)
+
+#    1.2.2.3 choose filter and apply ----
+# savitzky-golay filter is less invasive than butterworth (less variable residuals)
+qplot(thumbXbw-thumbXrep, thumbXsg-thumbXrep, data=testTrial, geom="point") + coord_fixed()
+
+testTrial$thumbX <- testTrial$thumbXsg
+testTrial$thumbY <- testTrial$thumbYsg
+testTrial$thumbZ <- testTrial$thumbZsg
 
 ##   1.1.3 translate and rotate to have all trajectories going in the same direction ----
 testTrial$thumbZ <- testTrial$thumbZ*-1
