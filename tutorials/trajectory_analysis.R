@@ -105,15 +105,51 @@ km.res <- as.data.frame(kmeans(na.omit(testTrial)[,c("time","indexX","indexY","i
 km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
 
 ##   1.1.4 translate and rotate to have all trajectories going in the same direction ----
+# calculate the direction of the movement in 3D
+# dataset containing to-be-rotated fingers positions
+rotData <- testTrial[,c("indexX","indexY","indexZ","thumbX","thumbY","thumbZ")]
+
+# first we center the trajectory at start
+# by translating by the centroids returned by the cluster analysis
+# index data
+index_translate <- km.res[km.res$moment=="start",c("indexX","indexY","indexZ")]
+index_translate <- index_translate[rep(1, nrow(rotData)),]
+rotData <- cbind(rotData, rotData[,c("indexX","indexY","indexZ")] - index_translate)
+names(rotData)[7:9] <- paste(names(rotData)[1:3], "t", sep="")
+
+# trasversal plane (x,z)
+theta.t <- with(km.res, atan((indexX[moment=="end"]-indexX[moment=="start"])/(indexZ[moment=="end"]-indexZ[moment=="start"])))
+# sagittal plane (y,z)
+theta.s <- with(km.res, atan((indexY[moment=="end"]-indexY[moment=="start"])/(indexZ[moment=="end"]-indexZ[moment=="start"])))
+# frontoparallel plane (x,y)
+theta.f <- with(km.res, atan((indexX[moment=="end"]-indexX[moment=="start"])/(indexY[moment=="end"]-indexY[moment=="start"])))
+
+ind.tr <- as.matrix(rotData[,c("indexXt","indexYt","indexZt")])
+ind.tr <- as.data.frame(rotate3d(ind.tr, theta.t, 0, 1, 0))
+names(ind.tr) <- paste(c("indexX","indexY","indexZ"), "r", sep="")
+
+# thumb data
+thumb_translate <- km.res[km.res$moment=="start",c("thumbX","thumbY","thumbZ")]
+thumb_translate <- thumb_translate[rep(1, nrow(rotData)),]
+rotData <- cbind(rotData, rotData[,c("thumbX","thumbY","thumbZ")] - thumb_translate)
+names(rotData)[10:12] <- paste(names(rotData)[1:3], "t", sep="")
+
 # if the centroid of the z coord of either finger is more negative in the second cluster (the latest) than in the first
 # then the forward direction (the z axis) is reversed, so we need to flip the z values
 # so that the forward direction becomes positive
 ind.Zdir <- with(km.res, indexZ[moment=="end"]) - with(km.res, indexZ[moment=="start"])
 thu.Zdir <- with(km.res, thumbZ[moment=="end"]) - with(km.res, thumbZ[moment=="start"])
 if(ind.Zdir < 0)
-  testTrial$indexZ <- testTrial$indexZ*-1
+  ind.tr$indexZr <- ind.tr$indexZr*-1
 if(thu.Zdir < 0)
-  testTrial$thumbZ <- testTrial$thumbZ*-1
+  test$thumbZ <- test$thumbZ*-1
+
+ggplot() +
+  geom_point(aes(indexX, indexZ), data=rotData) +
+  geom_point(aes(indexXr, indexZr), color = "red", data=ind.tr) +
+  coord_fixed()
+
+
 
 ##   1.1.4 find movement onset ----
 #    1.1.4.1 calculate velocity vector ----
