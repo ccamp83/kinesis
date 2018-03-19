@@ -2,7 +2,7 @@
 % Please edit documentation in R/libraries.r
 \name{libraries}
 \alias{libraries}
-\title{Load and update all the required libraries of the shapelab package}
+\title{Load and update all the required libraries of the kinesis package}
 \usage{
 libraries(update = F)
 }
@@ -10,5 +10,5 @@ libraries(update = F)
 \item{update}{if TRUE, the function also updates the libraries to newest version (FALSE by default)}
 }
 \description{
-Load and update all the required libraries of the shapelab package
+Load and update all the required libraries of the kinesis package
 }

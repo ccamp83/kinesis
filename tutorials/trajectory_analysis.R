@@ -97,93 +97,91 @@ testTrial$thumbZ <- testTrial$thumbZsg
 
 ##   1.1.3 translate and rotate to have all trajectories going in the same direction ----
 
-# dataset containing to-be-rotated fingers positions
-rotData.backup <- testTrial[,c("indexX","indexY","indexZ")]
+# the trajectory is assumed to start at origin (0,0,0)
+# and terminate at a point (0,0,z)
+# with x axis: rightwards positive, leftwards negative
+#      y axis: upwards positive, downwards negative
+#      z axis: forwards positive, backwards negative
+
+# this requires a translation followed by a rotation
+
+# we know that in this dataset the z axis is reversed relative to the expected direction
+# so we flip it
+testTrial$indexZ <- testTrial$indexZ * -1
+testTrial$thumbZ <- testTrial$thumbZ * -1
+
 # starting dataset to apply translations and rotations on recursively
-rotData <- rotData.backup
+indData.backup <- testTrial[,c("indexX","indexY","indexZ")]
+thuData.backup <- testTrial[,c("thumbX","thumbY","thumbZ")]
+# dataset containing to-be-rotated fingers positions
+rotData.backup <- rbind(indData.backup, setNames(thuData.backup, names(indData.backup)))
 
-plot3d(rotData, col = "gray70")
-
-##   1.1.3.1 find start and end of movement ----
+# define start and end of movement
 # case unknown
 # rationale: there will be many more samples around start and end of movement
 # because of the low speed of motion
 # hence the distribution of x, y and z positions should be highly bimodal
 # we use cluster analysis to find the centroids of the two clusters (start & end)
 # of each position of each finger
-kmData <- cbind(rotData, time = testTrial[,"time"])
+
+# CASE 1: whole grasp
+kmData <- cbind(rotData.backup, time = testTrial[,"time"])
 km.res <- as.data.frame(kmeans(kmData, 2)$centers)
 km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
-print(km.res)
-
-points3d(km.res[1:3], size = 15)
-
-# frontoparallel plane (x,y)
-theta <- atan2(as.numeric(km.res[km.res$moment=="start",1:3]),as.numeric(km.res[km.res$moment=="end",1:3]))
-theta[which(theta < 0)] <- theta[which(theta < 0)] + pi
-theta*180/pi
-# theta.f = with(km.res, atan2((indexX[moment=="end"]-indexX[moment=="start"]),(indexY[moment=="end"]-indexY[moment=="start"])))
-# # trasversal plane (x,z)
-# theta.t = with(km.res, atan2((indexX[moment=="end"]-indexX[moment=="start"]),(indexZ[moment=="end"]-indexZ[moment=="start"])))
-# # sagittal plane (y,z)
-# theta.s = with(km.res, atan2((indexY[moment=="end"]-indexY[moment=="start"]),(indexZ[moment=="end"]-indexZ[moment=="start"])))
-
-# first we center the trajectory at start
-# by translating by the centroids returned by the cluster analysis
+# translate the trajectory to origin (0,0,0)
 transData <- km.res[km.res$moment=="start", !names(km.res)%in%c("time","moment")] # getting the centroids
-transData <- transData[rep(1, nrow(rotData)),] # repeat for matrix substraction
-rotData <- rotData.backup - transData # matrix subtraction
+# matrix subtraction
+rotData <- rotData.backup - transData[rep(1, nrow(rotData.backup)),]
+indData <- indData.backup - transData[rep(1, nrow(indData)),]
+thuData <- thuData.backup - transData[rep(1, nrow(thuData)),]
+# end coordinates of the whole grasp
+end <- as.numeric(km.res[km.res$moment=="end",1:3] - km.res[km.res$moment=="start",1:3]) # centered end coordinates
+# rotate trajectories
+indData <- kin.rotate.trajectory(indData, end)
+thuData <- kin.rotate.trajectory(thuData, end)
+# polish rotated dataset
+indData <- as.data.frame(indData)
+names(indData) <- c("indexX","indexY","indexZ")
+thuData <- as.data.frame(thuData)
+names(thuData) <- c("thumbX","thumbY","thumbZ")
 
-points3d(rotData)
-cols <- data.frame(p = c("f","t","s"), color = c("red","blue","green"))
+plot3d(rotData[c(1,3,2)])
+points3d(indData[c(1,3,2)], col="red")
+points3d(thuData[c(1,3,2)], col="blue")
 
-# this requires a three-steps rotation in 3D
-for(plane in c("t","s"))
-{
-  rotData <- switch(plane,
-                    f = rotate3d(as.matrix(rotData), theta[1], 0, 0, 1),
-                    t = rotate3d(as.matrix(rotData), theta[2], 0, 1, 0),
-                    s = rotate3d(as.matrix(rotData), theta[1], 1, 0, 0)
-                    )
+# CASE 2: individual fingers
+# --- INDEX
+kmData <- cbind(indData.backup, time = testTrial[,"time"])
+km.res <- as.data.frame(kmeans(kmData, 2)$centers)
+km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
+# translate the trajectory to origin (0,0,0)
+transData <- km.res[km.res$moment=="start", !names(km.res)%in%c("time","moment")] # getting the centroids
+# matrix subtraction
+indData <- indData.backup - transData[rep(1, nrow(indData.backup)),]
+# end coordinates of the whole grasp
+end.ind <- as.numeric(km.res[km.res$moment=="end",1:3] - km.res[km.res$moment=="start",1:3]) # centered end coordinates
+# --- THUMB
+kmData <- cbind(thuData.backup, time = testTrial[,"time"])
+km.res <- as.data.frame(kmeans(kmData, 2)$centers)
+km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
+# translate the trajectory to origin (0,0,0)
+transData <- km.res[km.res$moment=="start", !names(km.res)%in%c("time","moment")] # getting the centroids
+# matrix subtraction
+thuData <- thuData.backup - transData[rep(1, nrow(thuData.backup)),]
+# end coordinates of the whole grasp
+end.thu <- as.numeric(km.res[km.res$moment=="end",1:3] - km.res[km.res$moment=="start",1:3]) # centered end coordinates
+# rotate trajectories
+indData.m <- kin.rotate.trajectory(indData, end.ind)
+thuData.m <- kin.rotate.trajectory(thuData, end.thu)
+# polish rotated dataset
+indData <- as.data.frame(indData.m)
+names(indData) <- c("indexX","indexY","indexZ")
+thuData <- as.data.frame(thuData.m)
+names(thuData) <- c("thumbX","thumbY","thumbZ")
 
-  rotData <- as.data.frame(rotData)
-  names(rotData) <- c("indexX","indexY","indexZ")
-
-  kmData <- cbind(rotData, time = testTrial[,"time"])
-  km.res <- as.data.frame(kmeans(kmData, 2)$centers)
-  km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
-  print(km.res)
-  points3d(km.res[1:3], size = 15, col = cols[cols$p==plane,]$color)
-
-  points3d(rotData, col = cols[cols$p==plane,]$color)
-}
-
-
-
-# thumb data
-thumb_translate <- km.res[km.res$moment=="start",c("thumbX","thumbY","thumbZ")]
-thumb_translate <- thumb_translate[rep(1, nrow(rotData)),]
-rotData <- cbind(rotData, rotData[,c("thumbX","thumbY","thumbZ")] - thumb_translate)
-names(rotData)[10:12] <- paste(names(rotData)[1:3], "t", sep="")
-
-# if the centroid of the z coord of either finger is more negative in the second cluster (the latest) than in the first
-# then the forward direction (the z axis) is reversed, so we need to flip the z values
-# so that the forward direction becomes positive
-ind.Zdir <- with(km.res, indexZ[moment=="end"]) - with(km.res, indexZ[moment=="start"])
-thu.Zdir <- with(km.res, thumbZ[moment=="end"]) - with(km.res, thumbZ[moment=="start"])
-if(ind.Zdir < 0)
-  ind.tr$indexZr <- ind.tr$indexZr*-1
-if(thu.Zdir < 0)
-  test$thumbZ <- test$thumbZ*-1
-
-# if theta.t < 0 then the z axis is reversed
-# we need to flip it first, so that the forward direction is positive
-if(theta.t < 0)
-{
-  rotData$indexZt <- -1*rotData$indexZt
-}
-
-
+plot3d(rotData[c(1,3,2)])
+points3d(indData[c(1,3,2)], col="red")
+points3d(thuData[c(1,3,2)], col="blue")
 
 ##   1.1.4 find movement onset ----
 #    1.1.4.1 calculate velocity vector ----

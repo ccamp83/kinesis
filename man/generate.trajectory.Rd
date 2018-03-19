@@ -4,7 +4,7 @@
 \alias{generate.trajectory}
 \title{Generate index and thumb trajectories accordind to Brenner and Smeets' model (1998)}
 \usage{
-generate.trajectory(start, end, phi, ap, MT, r)
+generate.trajectory(start, end, phi, ap, MT, r, index.only = F)
 }
 \arguments{
 \item{start}{a vector consisting of the x, y and z coordinates of the start position}
@@ -18,6 +18,8 @@ generate.trajectory(start, end, phi, ap, MT, r)
 \item{MT}{movement time (in millisec)}
 
 \item{r}{radius of the target object}
+
+\item{index.only}{logical: should the index trajectory be computed alone? (TRUE for pointing/reaching simulation; FALSE for grasping simulation; default to FALSE)}
 }
 \description{
 Generate index and thumb trajectories accordind to Brenner and Smeets' model (1998)
@@ -29,15 +31,15 @@ Since Brenner and Smeets' model assumes unconstrained path for each digit, when 
 \examples{
 libraries()
 dig <- generate.trajectory(start=c(200,-300,0), end=c(0,0,400), phi=pi/4, ap=1000, MT=1500, r=40)
-ggplot() + geom_point(aes(indexXraw, indexZraw), data=dig, color='red') + 
+ggplot() + geom_point(aes(indexXraw, indexZraw), data=dig, color='red') +
    geom_point(aes(thumbXraw, thumbZraw), data=dig, color='blue') + coord_fixed()
 plot3d(dig[,c(1,3,2)], col='red', radius=4, type='s')
 spheres3d(dig[,c(4,6,5)], col="blue", radius=4)
 
-# can be used with the other function of the shapelab package too:
+# can be used with the other function of the kinesis package too:
 libraries()
-dig <- generate.trajectory(start=c(200,-300,0), end=c(0,0,-400), phi=pi/4, ap=1000, MT=1500/11, r=40) 
-# note the negative sign of the final z coord since kin.SmoothAndDerive will multiply z coord by -1 
+dig <- generate.trajectory(start=c(200,-300,0), end=c(0,0,-400), phi=pi/4, ap=1000, MT=1500/11, r=40)
+# note the negative sign of the final z coord since kin.SmoothAndDerive will multiply z coord by -1
 # also note that MT was scaled by the refresh time (11ms in this case) to simulate optotrak sampling
 dig$trialN <- 1
 dig <- data.check(dig) # follows a bogus subjName (testName) as input to data.check - testName is not a function

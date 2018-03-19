@@ -11,7 +11,7 @@ data.check(dataset, refreshRate = 85, time.unit = 1000, ...)
 
 \item{refreshRate}{the refresh rate used during the motion capture (in hertz)}
 
-\item{time.unit}{the unit of measurement in which time is expressed in the 'time' column of the dataset given to the function. 1 = seconds, 10 = deciseconds, 100 = centiseconds, 1000 = milliseconds, ...}
+\item{time.unit}{the unit of measurement in which time is expressed in the 'time' column of the dataset given to the function. 1 = seconds, 10 = deciseconds, 100 = centiseconds, 1000 = milliseconds, ... Default to 1000}
 }
 \description{
 Check the data file and provide fixes if available
