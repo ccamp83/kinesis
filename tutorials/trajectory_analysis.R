@@ -95,38 +95,70 @@ testTrial$thumbX <- testTrial$thumbXsg
 testTrial$thumbY <- testTrial$thumbYsg
 testTrial$thumbZ <- testTrial$thumbZsg
 
-##   1.1.3 find start and end of movement (if unknown)
+##   1.1.3 translate and rotate to have all trajectories going in the same direction ----
+
+# dataset containing to-be-rotated fingers positions
+rotData.backup <- testTrial[,c("indexX","indexY","indexZ")]
+# starting dataset to apply translations and rotations on recursively
+rotData <- rotData.backup
+
+plot3d(rotData, col = "gray70")
+
+##   1.1.3.1 find start and end of movement ----
+# case unknown
 # rationale: there will be many more samples around start and end of movement
 # because of the low speed of motion
 # hence the distribution of x, y and z positions should be highly bimodal
 # we use cluster analysis to find the centroids of the two clusters (start & end)
 # of each position of each finger
-km.res <- as.data.frame(kmeans(na.omit(testTrial)[,c("time","indexX","indexY","indexZ","thumbX","thumbY","thumbZ")], 2)$centers)
+kmData <- cbind(rotData, time = testTrial[,"time"])
+km.res <- as.data.frame(kmeans(kmData, 2)$centers)
 km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
+print(km.res)
 
-##   1.1.4 translate and rotate to have all trajectories going in the same direction ----
-# calculate the direction of the movement in 3D
-# dataset containing to-be-rotated fingers positions
-rotData <- testTrial[,c("indexX","indexY","indexZ","thumbX","thumbY","thumbZ")]
+points3d(km.res[1:3], size = 15)
+
+# frontoparallel plane (x,y)
+theta <- atan2(as.numeric(km.res[km.res$moment=="start",1:3]),as.numeric(km.res[km.res$moment=="end",1:3]))
+theta[which(theta < 0)] <- theta[which(theta < 0)] + pi
+theta*180/pi
+# theta.f = with(km.res, atan2((indexX[moment=="end"]-indexX[moment=="start"]),(indexY[moment=="end"]-indexY[moment=="start"])))
+# # trasversal plane (x,z)
+# theta.t = with(km.res, atan2((indexX[moment=="end"]-indexX[moment=="start"]),(indexZ[moment=="end"]-indexZ[moment=="start"])))
+# # sagittal plane (y,z)
+# theta.s = with(km.res, atan2((indexY[moment=="end"]-indexY[moment=="start"]),(indexZ[moment=="end"]-indexZ[moment=="start"])))
 
 # first we center the trajectory at start
 # by translating by the centroids returned by the cluster analysis
-# index data
-index_translate <- km.res[km.res$moment=="start",c("indexX","indexY","indexZ")]
-index_translate <- index_translate[rep(1, nrow(rotData)),]
-rotData <- cbind(rotData, rotData[,c("indexX","indexY","indexZ")] - index_translate)
-names(rotData)[7:9] <- paste(names(rotData)[1:3], "t", sep="")
+transData <- km.res[km.res$moment=="start", !names(km.res)%in%c("time","moment")] # getting the centroids
+transData <- transData[rep(1, nrow(rotData)),] # repeat for matrix substraction
+rotData <- rotData.backup - transData # matrix subtraction
 
-# trasversal plane (x,z)
-theta.t <- with(km.res, atan((indexX[moment=="end"]-indexX[moment=="start"])/(indexZ[moment=="end"]-indexZ[moment=="start"])))
-# sagittal plane (y,z)
-theta.s <- with(km.res, atan((indexY[moment=="end"]-indexY[moment=="start"])/(indexZ[moment=="end"]-indexZ[moment=="start"])))
-# frontoparallel plane (x,y)
-theta.f <- with(km.res, atan((indexX[moment=="end"]-indexX[moment=="start"])/(indexY[moment=="end"]-indexY[moment=="start"])))
+points3d(rotData)
+cols <- data.frame(p = c("f","t","s"), color = c("red","blue","green"))
 
-ind.tr <- as.matrix(rotData[,c("indexXt","indexYt","indexZt")])
-ind.tr <- as.data.frame(rotate3d(ind.tr, theta.t, 0, 1, 0))
-names(ind.tr) <- paste(c("indexX","indexY","indexZ"), "r", sep="")
+# this requires a three-steps rotation in 3D
+for(plane in c("t","s"))
+{
+  rotData <- switch(plane,
+                    f = rotate3d(as.matrix(rotData), theta[1], 0, 0, 1),
+                    t = rotate3d(as.matrix(rotData), theta[2], 0, 1, 0),
+                    s = rotate3d(as.matrix(rotData), theta[1], 1, 0, 0)
+                    )
+
+  rotData <- as.data.frame(rotData)
+  names(rotData) <- c("indexX","indexY","indexZ")
+
+  kmData <- cbind(rotData, time = testTrial[,"time"])
+  km.res <- as.data.frame(kmeans(kmData, 2)$centers)
+  km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
+  print(km.res)
+  points3d(km.res[1:3], size = 15, col = cols[cols$p==plane,]$color)
+
+  points3d(rotData, col = cols[cols$p==plane,]$color)
+}
+
+
 
 # thumb data
 thumb_translate <- km.res[km.res$moment=="start",c("thumbX","thumbY","thumbZ")]
@@ -144,10 +176,12 @@ if(ind.Zdir < 0)
 if(thu.Zdir < 0)
   test$thumbZ <- test$thumbZ*-1
 
-ggplot() +
-  geom_point(aes(indexX, indexZ), data=rotData) +
-  geom_point(aes(indexXr, indexZr), color = "red", data=ind.tr) +
-  coord_fixed()
+# if theta.t < 0 then the z axis is reversed
+# we need to flip it first, so that the forward direction is positive
+if(theta.t < 0)
+{
+  rotData$indexZt <- -1*rotData$indexZt
+}
 
 
 
