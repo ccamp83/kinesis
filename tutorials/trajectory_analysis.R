@@ -189,7 +189,7 @@ points3d(thuData[c(1,3,2)], col="blue")
 testTrial$thumbXvel <- with(testTrial, kin.sgFilter(thumbX,m=1, ts = 1/85))
 testTrial$thumbYvel <- with(testTrial, kin.sgFilter(thumbY,m=1, ts = 1/85))
 testTrial$thumbZvel <- with(testTrial, kin.sgFilter(thumbZ,m=1, ts = 1/85))
-testTrial$thumbvel <- with(testTrial, sqrt(thumbXvel^2 + thumbYvel^2 + thumbZvel^2)) # in mm/s
+testTrial$thumbVel <- with(testTrial, sqrt(thumbXvel^2 + thumbYvel^2 + thumbZvel^2)) # in mm/s
 
 #    1.1.4.2 Savitzky-Golay filter velocitiy and acceleration vectors ----
 # 3rd order
