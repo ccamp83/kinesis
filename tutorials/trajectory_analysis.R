@@ -8,18 +8,11 @@ library(cowplot)
 #### Prepare the dataset ####
 # keep only useful columns
 usefCols <- c("trialN","indexXraw","indexYraw","indexZraw","thumbXraw","thumbYraw","thumbZraw")
-testData <- rtgData_bad[usefCols]
-# add frameN
-testData <- kin.frameN(testData)
+# Fix dataset
+testData <- data.check(rtgData_bad[usefCols])
+test
 # is there missing data for each digit in this dataset?
-testData <- kin.fingersOccluded(testData)
 any(testData$fingersOccluded==1) # YES
-# count frames with missing data
-testData <- kin.framesOccluded(testData)
-# create column for frame time (refresh rate)
-testData$frameT <- 1/85
-# create time column assuming constant 85Hz sampling
-testData$time <- testData$frameN * testData$frameT
 
 #### 1. individual trial analysis ####
 ###  1.1 extract ROI ----

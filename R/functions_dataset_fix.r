@@ -65,13 +65,9 @@ kin.framesOccluded <- function(dataset)
 
 # kin.time: multiplies each frame by a constant equal to the (nominal) refresh rate of the screen (Warning: this is just an artificial fix, actual refresh rate is variable - always make sure that actual time steps are in the original output file) ----
 #' @export
-kin.time <- function(dataset, refreshRate = 85)
+kin.time <- function(dataset, refreshRate = 85, time.unit = 1)
 {
-  # assign refreshRate to global environment for looping (temporary)
-  assign("refreshRate", refreshRate, envir = .GlobalEnv)
-  dataset <- ddply(dataset, .(trialN), mutate, time = frameN * 1000/refreshRate) # in milliseconds
-  # remove refreshRate from global environment
-  remove(refreshRate, envir = .GlobalEnv)
+  dataset <- ddply(dataset, .(trialN), mutate, time = frameN * time.unit / refreshRate) # in milliseconds
   return(dataset)
 }
 
