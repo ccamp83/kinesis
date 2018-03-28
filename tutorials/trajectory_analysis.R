@@ -132,8 +132,8 @@ km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
 transData <- km.res[km.res$moment=="start", !names(km.res)%in%c("time","moment")] # getting the centroids
 # matrix subtraction
 rotData <- rotData.backup - transData[rep(1, nrow(rotData.backup)),]
-indData <- indData.backup - transData[rep(1, nrow(indData)),]
-thuData <- thuData.backup - transData[rep(1, nrow(thuData)),]
+indData <- indData.backup - transData[rep(1, nrow(indData.backup)),]
+thuData <- thuData.backup - transData[rep(1, nrow(thuData.backup)),]
 # end coordinates of the whole grasp
 end <- as.numeric(km.res[km.res$moment=="end",1:3] - km.res[km.res$moment=="start",1:3]) # centered end coordinates
 # rotate trajectories
