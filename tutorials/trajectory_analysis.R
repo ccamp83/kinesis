@@ -107,8 +107,8 @@ testTrial$thumbZ <- testTrial$thumbZsg
 
 # we know that in this dataset the z axis is reversed relative to the expected direction
 # so we flip it
-testTrial$indexZ <- testTrial$indexZ * -1
-testTrial$thumbZ <- testTrial$thumbZ * -1
+# testTrial$indexZ <- testTrial$indexZ * -1
+# testTrial$thumbZ <- testTrial$thumbZ * -1
 
 # starting dataset to apply translations and rotations on recursively
 indData.backup <- testTrial[,c("indexX","indexY","indexZ")]
@@ -148,6 +148,12 @@ names(thuData) <- c("thumbX","thumbY","thumbZ")
 plot3d(rotData[c(1,3,2)])
 points3d(indData[c(1,3,2)], col="red")
 points3d(thuData[c(1,3,2)], col="blue")
+
+ggplot() +
+  geom_point(aes(indexX, indexZ), data= rotData) +
+  geom_point(aes(indexX, indexZ), data= indData, color = "red") +
+  geom_point(aes(thumbX, thumbZ), data= thuData, color = "blue") +
+  coord_fixed()
 
 # CASE 2: individual fingers
 # --- INDEX

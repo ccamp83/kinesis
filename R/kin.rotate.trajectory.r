@@ -24,16 +24,16 @@ kin.rotate.trajectory <- function(data, end)
     endCoord.x <- c(end[1], end[3], end[3])
     endCoord.y <- c(end[2], end[1], end[2])
     # compute angles
-    theta <- atan(endCoord.y/endCoord.x)
+    theta <- atan2(endCoord.y, endCoord.x)
     # rotate the trajectory
     data <- switch(plane,
-                   f = rotate3d(data, theta[1], 0, 0, 1),
+                   f = rotate3d(data, theta[1] + pi, 0, 0, 1),
                    t = rotate3d(data, theta[2], 0, 1, 0),
                    s = rotate3d(data, theta[3], 1, 0, 0)
     )
     # rotate end coordinates
     end <- switch(plane,
-                  f = rotate3d(end, theta[1], 0, 0, 1),
+                  f = rotate3d(end, theta[1] + pi, 0, 0, 1),
                   t = rotate3d(end, theta[2], 0, 1, 0),
                   s = rotate3d(end, theta[3], 1, 0, 0)
                   )
