@@ -33,7 +33,7 @@ kin.rescale <- function(x,a,b) {
 
 # kin.smooth.repair ----
 #' @export
-kin.smooth.repair <- function(x, y.raw, lam = .0005, maxFrames = 18, fingersOccluded, framesOccluded)
+kin.smooth.repair <- function(x, y.raw, lam = 1e-18, maxFrames = 18, fingersOccluded, framesOccluded)
 {
   y.raw[which(fingersOccluded==1)] <- NA
 
@@ -54,7 +54,7 @@ kin.smooth.repair <- function(x, y.raw, lam = .0005, maxFrames = 18, fingersOccl
     )
     occluded.frames.check$group <- with(occluded.frames.check, c(0, cumsum(diff(f) != 1)))
 
-    # assign maxFrames temporary in the global environment (temporarily)
+    # assign maxFrames temporarily to the global environment
     assign("maxFrames", maxFrames, envir = .GlobalEnv)
 
     occluded.frames.check <- ddply(occluded.frames.check, .(group), mutate,
@@ -65,9 +65,9 @@ kin.smooth.repair <- function(x, y.raw, lam = .0005, maxFrames = 18, fingersOccl
     y <- predict(fit, x) * ifelse(fingersOccluded == 1, NA, 1)
     y[frames.to.interpolate] <- predict(fit, x[frames.to.interpolate])
 
-    # remove maxFrames from the global environment
+    # remove maxFrames from global environment
     remove(maxFrames, envir = .GlobalEnv)
-    # remove lam from the global environment
+    # remove lam from global environment
     remove(lam, envir = .GlobalEnv)
 
     return(y)
@@ -83,38 +83,3 @@ kin.smooth.repair <- function(x, y.raw, lam = .0005, maxFrames = 18, fingersOccl
     return(y)
   }
 }
-
-# kin.GA.smooth.repair ----
-#' @export
-kin.GA.smooth.repair <- function(x, y, trialN, lam = 1e-04, maxFrames = 17, fingersOccluded, framesOccluded, n.lmax, n.lmax.lim = 60)
-{
-  if(length(n.lmax) > 1)
-    n.lmax <- unique(n.lmax)
-  if(length(trialN) > 1)
-    trialN <- unique(trialN)
-
-  GA <- NULL
-  if(n.lmax > n.lmax.lim)
-  {
-    cat("Trial #", trialN, ": too many local maxima (", n.lmax, "). Smoothing with lambda = ", lam, ".\n", sep='')
-    GA <- kin.smooth.repair(x, y, lam, maxFrames, fingersOccluded, framesOccluded)
-    return(GA)
-  } else if(n.lmax > 5)
-  {
-
-    lmaxmin <- NULL
-
-    while (n.lmax > 5)
-    {
-      GA <- kin.smooth.repair(x, y, lam, maxFrames, fingersOccluded, framesOccluded)
-      lmaxmin <- which(diff(sign(diff(GA)))==-2)+1
-      n.lmax <- length(lmaxmin)
-      lam <- lam + .005
-      if(lam > 10)
-        stop(cat("smoothing parameter too big. Trial #", trialN))
-    }
-    return(GA)
-  } else
-    return(y)
-}
-

@@ -7,12 +7,12 @@
 kin.rotate.trajectory(data, end)
 }
 \arguments{
-\item{data}{a rX3 matrix of x,y,z observations (data.frame is automatically converted to matrix)}
+\item{data}{a rX3 matrix of x,y,z observations (data.frame format is automatically converted to matrix)}
 
 \item{end}{a 3-length vector with x,y,z coordinates of the trajectory endpoint}
 }
 \details{
-the trajectory is assumed to start at origin (0,0,0)
+The trajectory is assumed to start at origin (0,0,0)
 and terminate at a point (0,0,z)
 with x axis: rightwards positive, leftwards negative
      y axis: upwards positive, downwards negative
