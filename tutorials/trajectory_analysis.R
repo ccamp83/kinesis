@@ -36,34 +36,13 @@ ggplot(aes(frameN, thumbXraw), data = testTrial) + geom_point() # thumb data is 
 max(testTrial$framesOccluded) # 15
 
 # repair missing frames
-testTrial$indexXrep <- with(testTrial, kin.smooth.repair(time,indexXraw, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
-testTrial$indexYrep <- with(testTrial, kin.smooth.repair(time,indexYraw, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
-testTrial$indexZrep <- with(testTrial, kin.smooth.repair(time,indexZraw, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+testTrial$indexXrep <- with(testTrial, kin.signal.analysis(indexXraw, maxFrames= 20))
+testTrial$indexYrep <- with(testTrial, kin.signal.analysis(indexYraw, maxFrames= 20))
+testTrial$indexZrep <- with(testTrial, kin.signal.analysis(indexZraw, maxFrames= 20))
 
-testTrial$thumbXrep <- with(testTrial, kin.smooth.repair(time,thumbXraw, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
-testTrial$thumbYrep <- with(testTrial, kin.smooth.repair(time,thumbYraw, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
-testTrial$thumbZrep <- with(testTrial, kin.smooth.repair(time,thumbZraw, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
-
-testTrial$thumbXraw
-v <- subset(rtgData_bad, trialN==40)$thumbXraw
-plot(v)
-
-# check missing frames
-vm <- kin.signal.missing(v)
-frames <- 1:length(vm)
-vm.flag <- ifelse(is.na(vm), 1, 0)
-vm.flag.count <- vm.flag * unlist(lapply(rle(vm.flag)$lengths, seq_len))
-
-
-vm.fit <- predict(sreg(frames, vm)) * vm.flag.count
-
-
-
-
-kin.signal.repair(x, maxFrames = 18)
-
-
-
+testTrial$thumbXrep <- with(testTrial, kin.signal.analysis(thumbXraw, maxFrames= 20))
+testTrial$thumbYrep <- with(testTrial, kin.signal.analysis(thumbYraw, maxFrames= 20))
+testTrial$thumbZrep <- with(testTrial, kin.signal.analysis(thumbZraw, maxFrames= 20))
 
 # thumb data fixed
 ggplot(aes(frameN, thumbXrep, color = fingersOccluded), data = testTrial) + geom_point()
@@ -78,7 +57,6 @@ testTrial$indexZbw <- with(testTrial, kin.bwFilter(indexZrep, cutoff_freq = 10, 
 testTrial$thumbXbw <- with(testTrial, kin.bwFilter(thumbXrep, cutoff_freq = 10, type = "pass"))
 testTrial$thumbYbw <- with(testTrial, kin.bwFilter(thumbYrep, cutoff_freq = 10, type = "pass"))
 testTrial$thumbZbw <- with(testTrial, kin.bwFilter(thumbZrep, cutoff_freq = 10, type = "pass"))
-
 
 ggplot(data = testTrial) +
   geom_point(aes(frameN, thumbXrep), color = "black") +
@@ -120,11 +98,6 @@ testTrial$thumbZ <- testTrial$thumbZsg
 #      z axis: forwards positive, backwards negative
 
 # this requires a translation followed by a rotation
-
-# we know that in this dataset the z axis is reversed relative to the expected direction
-# so we flip it
-# testTrial$indexZ <- testTrial$indexZ * -1
-# testTrial$thumbZ <- testTrial$thumbZ * -1
 
 # starting dataset to apply translations and rotations on recursively
 indData.backup <- testTrial[,c("indexX","indexY","indexZ")]

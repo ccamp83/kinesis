@@ -83,3 +83,63 @@ kin.smooth.repair <- function(x, y.raw, lam = 1e-18, maxFrames = 18, fingersOccl
     return(y)
   }
 }
+
+# kin.signal.analysis ----
+#' @export
+kin.signal.analysis <- function(y.raw, maxFrames = 18)
+{
+  # first check if the signal needs to be assessed
+  if(any(is.na(y.raw)))
+  {
+    y.raw <- kin.signal.missing(y.raw)
+  }
+
+  if(any(is.na(y.raw)))
+  {
+    cat("Reconstructing missing data...\n")
+
+    # which positions contain NAs?
+    missing.frames <- which(is.na(y.raw))
+
+    # flag the NAs in the vector
+    y.raw.flag.na <- ifelse(is.na(y.raw), 1, 0)
+    # cumulative count of NAs
+    y.raw.flag.na.count <- y.raw.flag.na * unlist(lapply(rle(y.raw.flag.na)$lengths, seq_len))
+
+    # create predictor
+    x <- 1:length(y.raw)
+
+    # fit the signal without NAs
+    fit <- fields::sreg(x[-missing.frames], na.omit(y.raw),lambda=1e-18)
+
+    # gather all missing data in groups
+    missing.frames.check <- data.frame(
+      missing.frames
+      ,
+      count = y.raw.flag.na.count[y.raw.flag.na.count!=0]
+    )
+    missing.frames.check$group <- with(missing.frames.check, c(0, cumsum(diff(count) != 1)))
+
+    # group-by-group decide whether to repair
+    assign("maxFrames", maxFrames, envir = .GlobalEnv) # assign maxFrames temporarily to the global environment
+    missing.frames.check <- ddply(missing.frames.check, .(group), mutate,
+                                  decision = ifelse(max(count) <= maxFrames, 'repair', 'discard'))
+
+    # extract frames for interpolation
+    frames.to.interpolate <- match(missing.frames.check$missing.frames[missing.frames.check$decision=='repair'], x)
+
+    # repair the signal
+    y <- y.raw
+    y[frames.to.interpolate] <- predict(fit, x[frames.to.interpolate])
+
+    # remove maxFrames from global environment
+    remove(maxFrames, envir = .GlobalEnv)
+
+    return(y)
+
+  } else
+  {
+    cat("Signal looks good.\n")
+    return(y.raw)
+  }
+}
