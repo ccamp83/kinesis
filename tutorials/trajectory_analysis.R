@@ -30,22 +30,43 @@ badTrialNum <- 40
 # from now on we continue analyzing this trial
 testTrial <- subset(testData, trialN == badTrialNum)
 # plot the data
-ggplot(aes(frameN, thumbXraw, color = fingersOccluded), data = testTrial) + geom_point() # thumb data is bad
-ggplot(aes(frameN, indexXraw, color = fingersOccluded), data = testTrial) + geom_point() # index data is OK
+ggplot(aes(frameN, thumbXraw), data = testTrial) + geom_point() # thumb data is bad
 
 # how many bad frame are there?
 max(testTrial$framesOccluded) # 15
 
 # repair missing frames
-testTrial$indexXrep <- with(testTrial, kin.smooth.repair(frameN,indexXraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
-testTrial$indexYrep <- with(testTrial, kin.smooth.repair(frameN,indexYraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
-testTrial$indexZrep <- with(testTrial, kin.smooth.repair(frameN,indexZraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+testTrial$indexXrep <- with(testTrial, kin.smooth.repair(time,indexXraw, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+testTrial$indexYrep <- with(testTrial, kin.smooth.repair(time,indexYraw, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+testTrial$indexZrep <- with(testTrial, kin.smooth.repair(time,indexZraw, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
 
-testTrial$thumbXrep <- with(testTrial, kin.smooth.repair(frameN,thumbXraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
-testTrial$thumbYrep <- with(testTrial, kin.smooth.repair(frameN,thumbYraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
-testTrial$thumbZrep <- with(testTrial, kin.smooth.repair(frameN,thumbZraw, lam = 10e-18, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+testTrial$thumbXrep <- with(testTrial, kin.smooth.repair(time,thumbXraw, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+testTrial$thumbYrep <- with(testTrial, kin.smooth.repair(time,thumbYraw, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
+testTrial$thumbZrep <- with(testTrial, kin.smooth.repair(time,thumbZraw, maxFrames= 20, fingersOccluded=fingersOccluded, framesOccluded=framesOccluded))
 
-ggplot(aes(frameN, thumbXrep, color = fingersOccluded), data = testTrial) + geom_point() # thumb data is bad
+testTrial$thumbXraw
+v <- subset(rtgData_bad, trialN==40)$thumbXraw
+plot(v)
+
+# check missing frames
+vm <- kin.signal.missing(v)
+frames <- 1:length(vm)
+vm.flag <- ifelse(is.na(vm), 1, 0)
+vm.flag.count <- vm.flag * unlist(lapply(rle(vm.flag)$lengths, seq_len))
+
+
+vm.fit <- predict(sreg(frames, vm)) * vm.flag.count
+
+
+
+
+kin.signal.repair(x, maxFrames = 18)
+
+
+
+
+# thumb data fixed
+ggplot(aes(frameN, thumbXrep, color = fingersOccluded), data = testTrial) + geom_point()
 
 ##   1.1.2 filter ----
 #    1.1.2.1 butterworth filter ----
@@ -57,6 +78,7 @@ testTrial$indexZbw <- with(testTrial, kin.bwFilter(indexZrep, cutoff_freq = 10, 
 testTrial$thumbXbw <- with(testTrial, kin.bwFilter(thumbXrep, cutoff_freq = 10, type = "pass"))
 testTrial$thumbYbw <- with(testTrial, kin.bwFilter(thumbYrep, cutoff_freq = 10, type = "pass"))
 testTrial$thumbZbw <- with(testTrial, kin.bwFilter(thumbZrep, cutoff_freq = 10, type = "pass"))
+
 
 ggplot(data = testTrial) +
   geom_point(aes(frameN, thumbXrep), color = "black") +
