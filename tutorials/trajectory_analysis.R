@@ -178,6 +178,19 @@ plot3d(rotData[c(1,3,2)])
 points3d(indData[c(1,3,2)], col="red")
 points3d(thuData[c(1,3,2)], col="blue")
 
+# merge rotated data and apply rotation
+names(indData) <- paste(names(indData), "rot", sep="")
+names(thuData) <- paste(names(thuData), "rot", sep="")
+testTrial <- cbind(testTrial, indData, thuData)
+
+testTrial$indexX <- testTrial$indexXrot
+testTrial$indexY <- testTrial$indexYrot
+testTrial$indexZ <- testTrial$indexZrot
+
+testTrial$thumbX <- testTrial$thumbXrot
+testTrial$thumbY <- testTrial$thumbYrot
+testTrial$thumbZ <- testTrial$thumbZrot
+
 ##   1.1.4 find movement onset ----
 #    1.1.4.1 calculate velocity vector ----
 # using Savitzy-Golay filter (remember the frame rate!!)
@@ -186,14 +199,23 @@ testTrial$thumbYvel <- with(testTrial, kin.sgFilter(thumbY,m=1, ts = 1/85))
 testTrial$thumbZvel <- with(testTrial, kin.sgFilter(thumbZ,m=1, ts = 1/85))
 testTrial$thumbVel <- with(testTrial, sqrt(thumbXvel^2 + thumbYvel^2 + thumbZvel^2)) # in mm/s
 
+# using Savitzy-Golay filter (remember the frame rate!!)
+testTrial$indexXvel <- with(testTrial, kin.sgFilter(indexX,m=1, ts = 1/85))
+testTrial$indexYvel <- with(testTrial, kin.sgFilter(indexY,m=1, ts = 1/85))
+testTrial$indexZvel <- with(testTrial, kin.sgFilter(indexZ,m=1, ts = 1/85))
+testTrial$indexVel <- with(testTrial, sqrt(indexXvel^2 + indexYvel^2 + indexZvel^2)) # in mm/s
+
 #    1.1.4.2 Savitzky-Golay filter velocitiy and acceleration vectors ----
 # 3rd order
 # filter velocity
+testTrial$indexVel <- with(testTrial, kin.sgFilter(indexVel, ts = 1/85))
 testTrial$thumbVel <- with(testTrial, kin.sgFilter(thumbVel, ts = 1/85))
 # derive acceleration
+testTrial$indexAcc <- with(testTrial, kin.sgFilter(indexVel, m=1, ts = 1/85))
 testTrial$thumbAcc <- with(testTrial, kin.sgFilter(thumbVel, m=1, ts = 1/85))
 # filter acceleration
-testTrial$thumbAcc <- with(testTrial, kin.sgFilter(thumbAcc, ts = 1/85))
+testTrial$indexAcc <- with(testTrial, kin.sgFilter(indexAcc, p = 60, ts = 1/85))
+testTrial$thumbAcc <- with(testTrial, kin.sgFilter(thumbAcc, p = 60, ts = 1/85))
 
 ggplot(data = testTrial) +
   geom_point(aes(time, thumbXvel), color = "red") +
@@ -203,12 +225,41 @@ ggplot(data = testTrial) +
 
 #    1.1.4.3 set onset frame ----
 # set the onset frame to be the first of four consecutive vector velocity readings of greater than a threshold
-# in which
 
-# crop trajectory where velocity is < 20 mm/s
-onsetData <- testTrial[,c("frameN","thumbVel","thumbAcc")]
-onsetData$travel <- with(onsetData, thumbVel > 20)
-with(onsetData, split(thumbVel, travel))
+# crop out the inbound portion of trajectory
+testTrial.backup <- testTrial
+testTrial <- subset(testTrial.backup, thumbZvel > -100 & indexZvel > -100)
+
+# crop out trajectory where velocity is < threshold
+# incrementally count frames where the condition is met
+# when you have a string of coutns above say 5 take the fist frame as zero
+
+
+
+
+# find core kinematics:
+# velocity peak
+# acceleration peak
+# deceleration peak
+
+
+ggplot(data = testTrial) +
+  geom_point(aes(time, thumbXvel), color = "red") +
+  geom_point(aes(time, thumbYvel), color = "darkgreen") +
+  geom_point(aes(time, thumbZvel), color = "blue") +
+  geom_point(aes(time, thumbVel), color = "black") +
+  geom_hline(yintercept = 250)
+
+
+# crop the portion of the trajectory that contains the velocity peak
+
+ggplot(aes(thumbZ, thumbY, color = thumbVel), data = subset(testTrial, thumbZ < max(thumbZ)/2)) +
+  geom_point() +
+  coord_fixed()
+
+ggplot(aes(thumbZ, thumbVel, color = thumbVel), data = subset(testTrial, thumbZ < max(thumbZ)/2)) +
+  geom_point()
+
 
 
 ##   1.1.5 find movement offset ----
