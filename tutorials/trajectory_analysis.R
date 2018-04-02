@@ -228,43 +228,29 @@ ggplot(data = testTrial) +
 
 # crop out the inbound portion of trajectory
 testTrial.backup <- testTrial
-testTrial <- subset(testTrial.backup, thumbZvel > -100 & indexZvel > -100)
+return_threshold <- -100
+testTrial <- subset(testTrial.backup, thumbZvel > return_threshold & indexZvel > return_threshold)
 
-# crop out trajectory where velocity is < threshold
+# crop out trajectory where z velocity is < threshold
 # incrementally count frames where the condition is met
 # when you have a string of coutns above say 5 take the fist frame as zero
-
-
-
+onset_threshold <- 100
+onsetFrame <- kin.find.onsetTime(testTrial$thumbVel, onset_threshold)
+# time at movement onset
+testTrial$onsetTime <- testTrial$time[testTrial$frameN == onsetFrame]
+# crop out trajectory before onset
+testTrial <- subset(testTrial, frameN >= onsetFrame)
 
 # find core kinematics:
 # velocity peak
 # acceleration peak
 # deceleration peak
-
-
 ggplot(data = testTrial) +
   geom_point(aes(time, thumbXvel), color = "red") +
   geom_point(aes(time, thumbYvel), color = "darkgreen") +
   geom_point(aes(time, thumbZvel), color = "blue") +
   geom_point(aes(time, thumbVel), color = "black") +
-  geom_hline(yintercept = 250)
-
-
-# crop the portion of the trajectory that contains the velocity peak
-
-ggplot(aes(thumbZ, thumbY, color = thumbVel), data = subset(testTrial, thumbZ < max(thumbZ)/2)) +
-  geom_point() +
-  coord_fixed()
-
-ggplot(aes(thumbZ, thumbVel, color = thumbVel), data = subset(testTrial, thumbZ < max(thumbZ)/2)) +
-  geom_point()
-
-
-
-##   1.1.5 find movement offset ----
-# We set the offset frame to be whichever of two events occurs first: the frame containing the maximum position value in
-# the direction of the reach (i.e., the max reach extent) or the first frame in which the velocity drops below 20 mm/s.
+  geom_hline(yintercept = 50)
 
 ###  1.2 trajectory normalization ----
 # time normalization is tricky
