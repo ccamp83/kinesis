@@ -51,8 +51,7 @@ data.check <- function(dataset, refreshRate = 85, time.unit = 1, ...)
     assign("refreshRate", refreshRate, envir = .GlobalEnv)
     assign("time.unit", time.unit, envir = .GlobalEnv)
 
-    reqCols <- c("subjName", "frameN", "time", "fingersOccluded",
-                 "framesOccluded","frameT")
+    reqCols <- c("subjName","frameN", "time","frameT")
     missingCols <- reqCols[!reqCols %in% names(dataset)]
     if (length(missingCols) > 0) {
       cat("The following columns do not exist:\n")
@@ -92,45 +91,9 @@ data.check <- function(dataset, refreshRate = 85, time.unit = 1, ...)
         cat("time added.\n")
       }
 
-      # Flag missing data
-      if ("fingersOccluded" %in% missingCols) {
-        dataset <- kin.fingersOccluded(dataset)
-        cat("fingersOccluded added.\n")
-      }
-
-      # Flag frames with missing data
-      if ("framesOccluded" %in% missingCols) {
-        dataset <- kin.framesOccluded(dataset)
-        cat("framesOccluded added.\n")
-      }
-
-      # Secondary check of missing data & frames (TODO fix this)
-      if(any(ddply(dataset, .(trialN), summarise,
-                   any(as.logical(fingersOccluded)) - any(as.logical(framesOccluded)))[2] < 0)) {
-        cat("fingersOccluded does not look right: fixing...\n")
-        dataset <- kin.fingersOccluded(dataset)
-      }
-      if(any(ddply(dataset, .(trialN), summarise,
-                   any(as.logical(fingersOccluded)) - any(as.logical(framesOccluded)))[2] > 0)) {
-        cat("framesOccluded does not look right: fixing...\n")
-        dataset <- kin.framesOccluded(dataset)
-      }
-
       cat("\nDatabase fixed successfully.")
     }
     else {
-
-      # Secondary check of missing data & frames (TODO fix this)
-      if(any(ddply(dataset, .(trialN), summarise,
-                   any(as.logical(fingersOccluded)) - any(as.logical(framesOccluded)))[2] < 0)) {
-        cat("checking 'fingersOccluded' column ...\n")
-        dataset <- kin.fingersOccluded(dataset)
-      }
-      if(any(ddply(dataset, .(trialN), summarise,
-                   any(as.logical(fingersOccluded)) - any(as.logical(framesOccluded)))[2] > 0)) {
-        cat("checking 'framesOccluded' column ...\n")
-        dataset <- kin.framesOccluded(dataset)
-      }
 
       cat("\nDatabase looks good.")
     }

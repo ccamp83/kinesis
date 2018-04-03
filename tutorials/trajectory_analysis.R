@@ -35,12 +35,6 @@ testTrial <- subset(testData, trialN == badTrialNum)
 # how many bad frame are there?
 max(testTrial$framesOccluded)
 
-x <- testTrial$indexXraw
-head(x)
-v <- c(x[1], ifelse(abs(c(NA, diff(x))) < .000001, NA, x)[-1])
-v[v%in%criterion] <- NA
-cat(sum(is.na(v)), " missing frames detected.\n", sep = "")
-
 # repair missing frames
 testTrial$indexXrep <- with(testTrial, kin.signal.analysis(indexXraw, maxFrames= 20))
 testTrial$indexYrep <- with(testTrial, kin.signal.analysis(indexYraw, maxFrames= 20))
@@ -83,7 +77,7 @@ testTrial$thumbZsg <- with(testTrial, kin.sgFilter(thumbZrep, ts = 1/85))
 #   geom_point(aes(frameN, thumbXsg), color = "green", alpha=.5)
 
 #    1.2.2.3 choose filter and apply ----
-# savitzky-golay filter is less invasive than butterworth (less variable residuals)
+# savitzky-golay filter is less distorting than butterworth (less variable residuals)
 # qplot(indexXbw-indexXrep, indexXsg-indexXrep, data=testTrial, geom="point") + coord_fixed()
 # qplot(thumbXbw-thumbXrep, thumbXsg-thumbXrep, data=testTrial, geom="point") + coord_fixed()
 
@@ -229,9 +223,9 @@ testTrial.backup <- testTrial
 return_threshold <- -100
 testTrial <- subset(testTrial.backup, thumbZvel > return_threshold & indexZvel > return_threshold)
 
-# crop out trajectory where z velocity is < threshold
+# flag trajectory where z velocity is > threshold
 # incrementally count frames where the condition is met
-# when you have a string of coutns above say 5 take the fist frame as zero
+# the longest string is the winner, take its fist frame as zero
 onset_threshold <- 100
 onsetFrame <- kin.find.onsetTime(testTrial$thumbVel, onset_threshold)
 # time at movement onset
@@ -249,14 +243,13 @@ testTrial$thumbJerk <- with(testTrial, kin.sgFilter(thumbAcc, m=1, ts = 1/85))
 # filter jerk
 testTrial$indexJerk <- with(testTrial, kin.sgFilter(indexJerk, p = 12, ts = 1/85))
 testTrial$thumbJerk <- with(testTrial, kin.sgFilter(thumbJerk, p = 12, ts = 1/85))
-
+# resultant vectors
 testTrial$thumbVelAccJerk.res <- with(testTrial, sqrt(thumbVel^2 + thumbAcc^2 + thumbJerk^2))
 testTrial$indexVelAccJerk.res <- with(testTrial, sqrt(thumbVel^2 + thumbAcc^2 + thumbJerk^2))
 testTrial$index_thumbVelAccJerk.res <- with(testTrial, sqrt(thumbVelAccJerk.res^2 + indexVelAccJerk.res^2))
-
+# find offest time
 offsetFrame <- with(testTrial, frameN[match(kin.min(index_thumbVelAccJerk.res), index_thumbVelAccJerk.res)])
 testTrial$offsetTime <- testTrial$time[testTrial$frameN == offsetFrame]
-
 # crop out trajectory after offset
 testTrial <- subset(testTrial, frameN <= offsetFrame)
 
@@ -269,18 +262,22 @@ keepCols <- c("trialN","indexX","indexY","indexZ","thumbX","thumbY","thumbZ",
 testTrial <- testTrial.backup1[keepCols]
 
 ggplot(data = testTrial) +
-  geom_point(aes(time, thumbZ, alpha = isStimulusDrawn), color = "blue") +
-  geom_point(aes(time, indexZ, alpha = isStimulusDrawn), color = "red")
-
-# find core kinematics:
-# velocity peak
-# acceleration peak
-# deceleration peak
-
+  geom_point(aes(time, thumbZ), color = "blue") +
+  geom_point(aes(time, indexZ), color = "red")
 
 ###  1.2 trajectory normalization ----
 # time normalization is tricky
-# space normalization can be better
+# so opt for space normalization
+
+# first calculate euclidean distance of a reference trajectory to its final position
+# in this example's case, it's the thumb
+testTrial$thuDist <- sqrt((testTrial$thumbX - tail(testTrial$thumbX, 1))^2 +
+                          (testTrial$thumbY - tail(testTrial$thumbY, 1))^2 +
+                          (testTrial$thumbZ - tail(testTrial$thumbZ, 1))^2
+                          )
+# bin that distance
+binN <- 100
+testTrial$thuDistB <- with(testTrial, cut(thuDist, breaks = binN, labels = F))
 
 ##   1.2.1 space normalization through Functional Data Analysis (FDA) ----
 # fit data with mathematical function
@@ -293,3 +290,7 @@ ggplot(data = testTrial) +
 #### 2. single participant's average of many trials within a given experimental condition ####
 #### 3. group average of that condition (average of all participants' mean trajectories) ####
 
+# find core kinematics:
+# velocity peak
+# acceleration peak
+# deceleration peak
