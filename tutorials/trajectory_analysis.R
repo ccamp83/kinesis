@@ -29,6 +29,7 @@ trial.na.frame <- unique(subset(testData, missing.frames)$trialN)
 (badTrialNum <- sample(trial.na.frame, 1))
 # from now on we continue analyzing this trial
 testTrial <- subset(testData, trialN == badTrialNum)
+# testTrial <- subset(testData, trialN == badTrialNum)
 # plot the data
 # ggplot(aes(frameN, thumbXraw), data = testTrial) + geom_point() # thumb data is bad
 
@@ -36,13 +37,13 @@ testTrial <- subset(testData, trialN == badTrialNum)
 max(testTrial$framesOccluded)
 
 # repair missing frames
-testTrial$indexXrep <- with(testTrial, kin.signal.analysis(indexXraw, maxFrames= 20))
-testTrial$indexYrep <- with(testTrial, kin.signal.analysis(indexYraw, maxFrames= 20))
-testTrial$indexZrep <- with(testTrial, kin.signal.analysis(indexZraw, maxFrames= 20))
+testTrial$indexXrep <- with(testTrial, kin.signal.repair(indexXraw, maxFrames= 20))
+testTrial$indexYrep <- with(testTrial, kin.signal.repair(indexYraw, maxFrames= 20))
+testTrial$indexZrep <- with(testTrial, kin.signal.repair(indexZraw, maxFrames= 20))
 
-testTrial$thumbXrep <- with(testTrial, kin.signal.analysis(thumbXraw, maxFrames= 20))
-testTrial$thumbYrep <- with(testTrial, kin.signal.analysis(thumbYraw, maxFrames= 20))
-testTrial$thumbZrep <- with(testTrial, kin.signal.analysis(thumbZraw, maxFrames= 20))
+testTrial$thumbXrep <- with(testTrial, kin.signal.repair(thumbXraw, maxFrames= 20))
+testTrial$thumbYrep <- with(testTrial, kin.signal.repair(thumbYraw, maxFrames= 20))
+testTrial$thumbZrep <- with(testTrial, kin.signal.repair(thumbZraw, maxFrames= 20))
 
 # thumb data fixed
 # ggplot(aes(frameN, thumbXrep, color = fingersOccluded), data = testTrial) + geom_point()
@@ -50,13 +51,13 @@ testTrial$thumbZrep <- with(testTrial, kin.signal.analysis(thumbZraw, maxFrames=
 ##   1.1.2 filter ----
 #    1.1.2.1 butterworth filter ----
 # dual pass, 8–12 Hz cutoff, 2nd order
-testTrial$indexXbw <- with(testTrial, kin.bwFilter(indexXrep, cutoff_freq = 10, type = "pass"))
-testTrial$indexYbw <- with(testTrial, kin.bwFilter(indexYrep, cutoff_freq = 10, type = "pass"))
-testTrial$indexZbw <- with(testTrial, kin.bwFilter(indexZrep, cutoff_freq = 10, type = "pass"))
-
-testTrial$thumbXbw <- with(testTrial, kin.bwFilter(thumbXrep, cutoff_freq = 10, type = "pass"))
-testTrial$thumbYbw <- with(testTrial, kin.bwFilter(thumbYrep, cutoff_freq = 10, type = "pass"))
-testTrial$thumbZbw <- with(testTrial, kin.bwFilter(thumbZrep, cutoff_freq = 10, type = "pass"))
+# testTrial$indexXbw <- with(testTrial, kin.bwFilter(indexXrep, cutoff_freq = 10, type = "pass"))
+# testTrial$indexYbw <- with(testTrial, kin.bwFilter(indexYrep, cutoff_freq = 10, type = "pass"))
+# testTrial$indexZbw <- with(testTrial, kin.bwFilter(indexZrep, cutoff_freq = 10, type = "pass"))
+#
+# testTrial$thumbXbw <- with(testTrial, kin.bwFilter(thumbXrep, cutoff_freq = 10, type = "pass"))
+# testTrial$thumbYbw <- with(testTrial, kin.bwFilter(thumbYrep, cutoff_freq = 10, type = "pass"))
+# testTrial$thumbZbw <- with(testTrial, kin.bwFilter(thumbZrep, cutoff_freq = 10, type = "pass"))
 
 # ggplot(data = testTrial) +
 #   geom_point(aes(frameN, thumbXrep), color = "black") +
@@ -134,9 +135,9 @@ names(indData) <- c("indexX","indexY","indexZ")
 thuData <- as.data.frame(thuData)
 names(thuData) <- c("thumbX","thumbY","thumbZ")
 
-plot3d(rotData[c(1,3,2)])
-points3d(indData[c(1,3,2)], col="red")
-points3d(thuData[c(1,3,2)], col="blue")
+# plot3d(rotData[c(1,3,2)])
+# points3d(indData[c(1,3,2)], col="red")
+# points3d(thuData[c(1,3,2)], col="blue")
 
 # ggplot() +
 #   geom_point(aes(indexX, indexZ), data= rotData) +
@@ -144,35 +145,35 @@ points3d(thuData[c(1,3,2)], col="blue")
 #   geom_point(aes(thumbX, thumbZ), data= thuData, color = "blue") +
 #   coord_fixed()
 
-# CASE 2: individual fingers
-# --- INDEX
-kmData <- cbind(indData.backup, time = testTrial[,"time"])
-km.res <- as.data.frame(kmeans(kmData, 2)$centers)
-km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
-# translate the trajectory to origin (0,0,0)
-transData <- km.res[km.res$moment=="start", !names(km.res)%in%c("time","moment")] # getting the centroids
-# matrix subtraction
-indData <- indData.backup - transData[rep(1, nrow(indData.backup)),]
-# end coordinates of the whole grasp
-end.ind <- as.numeric(km.res[km.res$moment=="end",1:3] - km.res[km.res$moment=="start",1:3]) # centered end coordinates
-# --- THUMB
-kmData <- cbind(thuData.backup, time = testTrial[,"time"])
-km.res <- as.data.frame(kmeans(kmData, 2)$centers)
-km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
-# translate the trajectory to origin (0,0,0)
-transData <- km.res[km.res$moment=="start", !names(km.res)%in%c("time","moment")] # getting the centroids
-# matrix subtraction
-thuData <- thuData.backup - transData[rep(1, nrow(thuData.backup)),]
-# end coordinates of the whole grasp
-end.thu <- as.numeric(km.res[km.res$moment=="end",1:3] - km.res[km.res$moment=="start",1:3]) # centered end coordinates
-# rotate trajectories
-indData.m <- kin.rotate.trajectory(indData, end.ind)
-thuData.m <- kin.rotate.trajectory(thuData, end.thu)
-# polish rotated dataset
-indData <- as.data.frame(indData.m)
-names(indData) <- c("indexX","indexY","indexZ")
-thuData <- as.data.frame(thuData.m)
-names(thuData) <- c("thumbX","thumbY","thumbZ")
+# # CASE 2: individual fingers
+# # --- INDEX
+# kmData <- cbind(indData.backup, time = testTrial[,"time"])
+# km.res <- as.data.frame(kmeans(kmData, 2)$centers)
+# km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
+# # translate the trajectory to origin (0,0,0)
+# transData <- km.res[km.res$moment=="start", !names(km.res)%in%c("time","moment")] # getting the centroids
+# # matrix subtraction
+# indData <- indData.backup - transData[rep(1, nrow(indData.backup)),]
+# # end coordinates of the whole grasp
+# end.ind <- as.numeric(km.res[km.res$moment=="end",1:3] - km.res[km.res$moment=="start",1:3]) # centered end coordinates
+# # --- THUMB
+# kmData <- cbind(thuData.backup, time = testTrial[,"time"])
+# km.res <- as.data.frame(kmeans(kmData, 2)$centers)
+# km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
+# # translate the trajectory to origin (0,0,0)
+# transData <- km.res[km.res$moment=="start", !names(km.res)%in%c("time","moment")] # getting the centroids
+# # matrix subtraction
+# thuData <- thuData.backup - transData[rep(1, nrow(thuData.backup)),]
+# # end coordinates of the whole grasp
+# end.thu <- as.numeric(km.res[km.res$moment=="end",1:3] - km.res[km.res$moment=="start",1:3]) # centered end coordinates
+# # rotate trajectories
+# indData.m <- kin.rotate.trajectory(indData, end.ind)
+# thuData.m <- kin.rotate.trajectory(thuData, end.thu)
+# # polish rotated dataset
+# indData <- as.data.frame(indData.m)
+# names(indData) <- c("indexX","indexY","indexZ")
+# thuData <- as.data.frame(thuData.m)
+# names(thuData) <- c("thumbX","thumbY","thumbZ")
 
 # plot3d(rotData[c(1,3,2)])
 # points3d(indData[c(1,3,2)], col="red")
@@ -205,7 +206,7 @@ testTrial$indexYvel <- with(testTrial, kin.sgFilter(indexY,m=1, ts = 1/85))
 testTrial$indexZvel <- with(testTrial, kin.sgFilter(indexZ,m=1, ts = 1/85))
 testTrial$indexVel <- with(testTrial, sqrt(indexXvel^2 + indexYvel^2 + indexZvel^2)) # in mm/s
 
-#    1.1.4.2 Savitzky-Golay filter velocitiy and acceleration vectors ----
+#    1.1.4.2 Savitzky-Golay filter velocitiy, acceleration and jerk vectors ----
 # 3rd order
 # filter velocity
 testTrial$indexVel <- with(testTrial, kin.sgFilter(indexVel, ts = 1/85))
@@ -216,6 +217,12 @@ testTrial$thumbAcc <- with(testTrial, kin.sgFilter(thumbVel, m=1, ts = 1/85))
 # filter acceleration
 testTrial$indexAcc <- with(testTrial, kin.sgFilter(indexAcc, p = 12, ts = 1/85))
 testTrial$thumbAcc <- with(testTrial, kin.sgFilter(thumbAcc, p = 12, ts = 1/85))
+# derive jerk
+testTrial$indexJerk <- with(testTrial, kin.sgFilter(indexAcc, m=1, ts = 1/85))
+testTrial$thumbJerk <- with(testTrial, kin.sgFilter(thumbAcc, m=1, ts = 1/85))
+# filter jerk
+testTrial$indexJerk <- with(testTrial, kin.sgFilter(indexJerk, p = 12, ts = 1/85))
+testTrial$thumbJerk <- with(testTrial, kin.sgFilter(thumbJerk, p = 12, ts = 1/85))
 
 #    1.1.4.3 find onset time ----
 # crop out the inbound portion of trajectory
@@ -237,12 +244,6 @@ testTrial <- subset(testTrial, frameN >= onsetFrame)
 # in case there is no exact offset time, offset time is defined differently depending on the movement
 # in the case of grasping, it is defined as the time at which velocity, acceleration and jerk of index and thumb reach a minimum
 
-# derive jerk
-testTrial$indexJerk <- with(testTrial, kin.sgFilter(indexAcc, m=1, ts = 1/85))
-testTrial$thumbJerk <- with(testTrial, kin.sgFilter(thumbAcc, m=1, ts = 1/85))
-# filter jerk
-testTrial$indexJerk <- with(testTrial, kin.sgFilter(indexJerk, p = 12, ts = 1/85))
-testTrial$thumbJerk <- with(testTrial, kin.sgFilter(thumbJerk, p = 12, ts = 1/85))
 # resultant vectors
 testTrial$thumbVelAccJerk.res <- with(testTrial, sqrt(thumbVel^2 + thumbAcc^2 + thumbJerk^2))
 testTrial$indexVelAccJerk.res <- with(testTrial, sqrt(thumbVel^2 + thumbAcc^2 + thumbJerk^2))
@@ -278,6 +279,37 @@ testTrial$thuDist <- sqrt((testTrial$thumbX - tail(testTrial$thumbX, 1))^2 +
 # bin that distance
 binN <- 100
 testTrial$thuDistB <- with(testTrial, cut(thuDist, breaks = binN, labels = F))
+
+
+
+#### check velocity ####
+# check if there are anomalies in the calculation of velocity and acceleration that might be due to bad sampling
+testTrial$indexVel.check <- mu::outliers.check(testTrial$indexVel, sd.thresh = 1.5, logical = T)
+testTrial$thumbVel.check <- mu::outliers.check(testTrial$thumbVel, sd.thresh = 1.5, logical = T)
+
+print(
+  ggplot(data = testTrial) +
+    geom_point(aes(time, scale(indexVel), alpha = indexVel.check), color = "red") +
+    geom_point(aes(time, scale(thumbVel), alpha = thumbVel.check), color = "blue")
+)
+
+# turn bad samples into NAs
+testTrial$indexX[testTrial$indexVel.check==1] <- NA
+testTrial$indexY[testTrial$indexVel.check==1] <- NA
+testTrial$indexZ[testTrial$indexVel.check==1] <- NA
+
+testTrial$thumbX[testTrial$thumbVel.check==1] <- NA
+testTrial$thumbY[testTrial$thumbVel.check==1] <- NA
+testTrial$thumbZ[testTrial$thumbVel.check==1] <- NA
+# repair again
+testTrial$indexX <- with(testTrial, kin.signal.repair(indexX, maxFrames= 20))
+testTrial$indexY <- with(testTrial, kin.signal.repair(indexY, maxFrames= 20))
+testTrial$indexZ <- with(testTrial, kin.signal.repair(indexZ, maxFrames= 20))
+
+testTrial$thumbX <- with(testTrial, kin.signal.repair(thumbX, maxFrames= 20))
+testTrial$thumbY <- with(testTrial, kin.signal.repair(thumbY, maxFrames= 20))
+testTrial$thumbZ <- with(testTrial, kin.signal.repair(thumbZ, maxFrames= 20))
+
 
 ##   1.2.1 space normalization through Functional Data Analysis (FDA) ----
 # fit data with mathematical function

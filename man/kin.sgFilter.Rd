@@ -4,8 +4,8 @@
 \alias{kin.sgFilter}
 \title{apply Savitzky-Golay filter}
 \usage{
-kin.sgFilter(x, p = 3, n = p + 3 - p\%\%2, m = 0, ts = 1)
+kin.sgFilter(x, p = 3, m = 0, ts = 1)
 }
 \description{
-This functon is exactly identical to signal::sgolayfilt
+This functon is a wrapper for signal::sgolayfilt with a modification to handle NAs
 }

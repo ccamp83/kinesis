@@ -1,5 +1,11 @@
 # kin.bwFilter ----
 #' apply Savitzky-Golay filter
-#' @description This functon is exactly identical to signal::sgolayfilt
+#' @description This functon is a wrapper for signal::sgolayfilt with a modification to handle NAs
 #' @export
-kin.sgFilter <- signal::sgolayfilt
+kin.sgFilter <- function(x, p = 3, m = 0, ts = 1)
+{
+  output <- rep(NA, length(x))
+  output[which(!is.na(x))] <- signal::sgolayfilt(na.omit(x), p = p, m = m, ts = ts)
+  return(output)
+}
+
