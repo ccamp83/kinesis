@@ -72,9 +72,9 @@ for(tN in unique(testData$trialN))
 
 unique(graspData$trialN)
 
-ggplot(data = graspData) +
-  geom_point(aes(thuDist, indexZ), color = "red") +
-  geom_point(aes(thuDist, thumbZ), color = "blue") +
+ggplot(data = subset(graspData, trialN==46)) +
+  geom_point(aes(indexX, indexZ), color = "red") +
+  geom_point(aes(thumbX, thumbZ), color = "blue") +
   coord_fixed()
 
 
