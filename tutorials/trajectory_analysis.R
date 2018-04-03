@@ -26,14 +26,20 @@ testData <- ddply(testData, .(trialN), mutate,
 # extract these trials number
 trial.na.frame <- unique(subset(testData, missing.frames)$trialN)
 # pick a random bad trial
-badTrialNum <- 40
+(badTrialNum <- sample(trial.na.frame, 1))
 # from now on we continue analyzing this trial
 testTrial <- subset(testData, trialN == badTrialNum)
 # plot the data
-ggplot(aes(frameN, thumbXraw), data = testTrial) + geom_point() # thumb data is bad
+# ggplot(aes(frameN, thumbXraw), data = testTrial) + geom_point() # thumb data is bad
 
 # how many bad frame are there?
-max(testTrial$framesOccluded) # 15
+max(testTrial$framesOccluded)
+
+x <- testTrial$indexXraw
+head(x)
+v <- c(x[1], ifelse(abs(c(NA, diff(x))) < .000001, NA, x)[-1])
+v[v%in%criterion] <- NA
+cat(sum(is.na(v)), " missing frames detected.\n", sep = "")
 
 # repair missing frames
 testTrial$indexXrep <- with(testTrial, kin.signal.analysis(indexXraw, maxFrames= 20))
@@ -45,7 +51,7 @@ testTrial$thumbYrep <- with(testTrial, kin.signal.analysis(thumbYraw, maxFrames=
 testTrial$thumbZrep <- with(testTrial, kin.signal.analysis(thumbZraw, maxFrames= 20))
 
 # thumb data fixed
-ggplot(aes(frameN, thumbXrep, color = fingersOccluded), data = testTrial) + geom_point()
+# ggplot(aes(frameN, thumbXrep, color = fingersOccluded), data = testTrial) + geom_point()
 
 ##   1.1.2 filter ----
 #    1.1.2.1 butterworth filter ----
@@ -58,9 +64,9 @@ testTrial$thumbXbw <- with(testTrial, kin.bwFilter(thumbXrep, cutoff_freq = 10, 
 testTrial$thumbYbw <- with(testTrial, kin.bwFilter(thumbYrep, cutoff_freq = 10, type = "pass"))
 testTrial$thumbZbw <- with(testTrial, kin.bwFilter(thumbZrep, cutoff_freq = 10, type = "pass"))
 
-ggplot(data = testTrial) +
-  geom_point(aes(frameN, thumbXrep), color = "black") +
-  geom_point(aes(frameN, thumbXbw), color = "red", alpha=.5)
+# ggplot(data = testTrial) +
+#   geom_point(aes(frameN, thumbXrep), color = "black") +
+#   geom_point(aes(frameN, thumbXbw), color = "red", alpha=.5)
 
 #    1.1.2.2 Savitzky-Golay filter ----
 # 3rd order
@@ -72,14 +78,14 @@ testTrial$thumbXsg <- with(testTrial, kin.sgFilter(thumbXrep, ts = 1/85))
 testTrial$thumbYsg <- with(testTrial, kin.sgFilter(thumbYrep, ts = 1/85))
 testTrial$thumbZsg <- with(testTrial, kin.sgFilter(thumbZrep, ts = 1/85))
 
-ggplot(data = testTrial) +
-  geom_point(aes(frameN, thumbXrep), color = "black") +
-  geom_point(aes(frameN, thumbXsg), color = "green", alpha=.5)
+# ggplot(data = testTrial) +
+#   geom_point(aes(frameN, thumbXrep), color = "black") +
+#   geom_point(aes(frameN, thumbXsg), color = "green", alpha=.5)
 
 #    1.2.2.3 choose filter and apply ----
 # savitzky-golay filter is less invasive than butterworth (less variable residuals)
-qplot(indexXbw-indexXrep, indexXsg-indexXrep, data=testTrial, geom="point") + coord_fixed()
-qplot(thumbXbw-thumbXrep, thumbXsg-thumbXrep, data=testTrial, geom="point") + coord_fixed()
+# qplot(indexXbw-indexXrep, indexXsg-indexXrep, data=testTrial, geom="point") + coord_fixed()
+# qplot(thumbXbw-thumbXrep, thumbXsg-thumbXrep, data=testTrial, geom="point") + coord_fixed()
 
 testTrial$indexX <- testTrial$indexXsg
 testTrial$indexY <- testTrial$indexYsg
@@ -138,11 +144,11 @@ plot3d(rotData[c(1,3,2)])
 points3d(indData[c(1,3,2)], col="red")
 points3d(thuData[c(1,3,2)], col="blue")
 
-ggplot() +
-  geom_point(aes(indexX, indexZ), data= rotData) +
-  geom_point(aes(indexX, indexZ), data= indData, color = "red") +
-  geom_point(aes(thumbX, thumbZ), data= thuData, color = "blue") +
-  coord_fixed()
+# ggplot() +
+#   geom_point(aes(indexX, indexZ), data= rotData) +
+#   geom_point(aes(indexX, indexZ), data= indData, color = "red") +
+#   geom_point(aes(thumbX, thumbZ), data= thuData, color = "blue") +
+#   coord_fixed()
 
 # CASE 2: individual fingers
 # --- INDEX
@@ -174,9 +180,9 @@ names(indData) <- c("indexX","indexY","indexZ")
 thuData <- as.data.frame(thuData.m)
 names(thuData) <- c("thumbX","thumbY","thumbZ")
 
-plot3d(rotData[c(1,3,2)])
-points3d(indData[c(1,3,2)], col="red")
-points3d(thuData[c(1,3,2)], col="blue")
+# plot3d(rotData[c(1,3,2)])
+# points3d(indData[c(1,3,2)], col="red")
+# points3d(thuData[c(1,3,2)], col="blue")
 
 # merge rotated data and apply rotation
 names(indData) <- paste(names(indData), "rot", sep="")
@@ -214,18 +220,10 @@ testTrial$thumbVel <- with(testTrial, kin.sgFilter(thumbVel, ts = 1/85))
 testTrial$indexAcc <- with(testTrial, kin.sgFilter(indexVel, m=1, ts = 1/85))
 testTrial$thumbAcc <- with(testTrial, kin.sgFilter(thumbVel, m=1, ts = 1/85))
 # filter acceleration
-testTrial$indexAcc <- with(testTrial, kin.sgFilter(indexAcc, p = 60, ts = 1/85))
-testTrial$thumbAcc <- with(testTrial, kin.sgFilter(thumbAcc, p = 60, ts = 1/85))
+testTrial$indexAcc <- with(testTrial, kin.sgFilter(indexAcc, p = 12, ts = 1/85))
+testTrial$thumbAcc <- with(testTrial, kin.sgFilter(thumbAcc, p = 12, ts = 1/85))
 
-ggplot(data = testTrial) +
-  geom_point(aes(time, thumbXvel), color = "red") +
-  geom_point(aes(time, thumbYvel), color = "darkgreen") +
-  geom_point(aes(time, thumbZvel), color = "blue") +
-  geom_point(aes(time, thumbVel), color = "black")
-
-#    1.1.4.3 set onset frame ----
-# set the onset frame to be the first of four consecutive vector velocity readings of greater than a threshold
-
+#    1.1.4.3 find onset time ----
 # crop out the inbound portion of trajectory
 testTrial.backup <- testTrial
 return_threshold <- -100
@@ -241,16 +239,44 @@ testTrial$onsetTime <- testTrial$time[testTrial$frameN == onsetFrame]
 # crop out trajectory before onset
 testTrial <- subset(testTrial, frameN >= onsetFrame)
 
+#    1.1.4.4 find offset time ----
+# in case there is no exact offset time, offset time is defined differently depending on the movement
+# in the case of grasping, it is defined as the time at which velocity, acceleration and jerk of index and thumb reach a minimum
+
+# derive jerk
+testTrial$indexJerk <- with(testTrial, kin.sgFilter(indexAcc, m=1, ts = 1/85))
+testTrial$thumbJerk <- with(testTrial, kin.sgFilter(thumbAcc, m=1, ts = 1/85))
+# filter jerk
+testTrial$indexJerk <- with(testTrial, kin.sgFilter(indexJerk, p = 12, ts = 1/85))
+testTrial$thumbJerk <- with(testTrial, kin.sgFilter(thumbJerk, p = 12, ts = 1/85))
+
+testTrial$thumbVelAccJerk.res <- with(testTrial, sqrt(thumbVel^2 + thumbAcc^2 + thumbJerk^2))
+testTrial$indexVelAccJerk.res <- with(testTrial, sqrt(thumbVel^2 + thumbAcc^2 + thumbJerk^2))
+testTrial$index_thumbVelAccJerk.res <- with(testTrial, sqrt(thumbVelAccJerk.res^2 + indexVelAccJerk.res^2))
+
+offsetFrame <- with(testTrial, frameN[match(kin.min(index_thumbVelAccJerk.res), index_thumbVelAccJerk.res)])
+testTrial$offsetTime <- testTrial$time[testTrial$frameN == offsetFrame]
+
+# crop out trajectory after offset
+testTrial <- subset(testTrial, frameN <= offsetFrame)
+
+#    1.1.4.5 package results ----
+# columns to keep
+testTrial.backup1 <- testTrial
+keepCols <- c("trialN","indexX","indexY","indexZ","thumbX","thumbY","thumbZ",
+              "subjName","frameN","frameT","time",
+              "indexVel","indexAcc","thumbVel","thumbAcc")
+testTrial <- testTrial.backup1[keepCols]
+
+ggplot(data = testTrial) +
+  geom_point(aes(time, thumbZ, alpha = isStimulusDrawn), color = "blue") +
+  geom_point(aes(time, indexZ, alpha = isStimulusDrawn), color = "red")
+
 # find core kinematics:
 # velocity peak
 # acceleration peak
 # deceleration peak
-ggplot(data = testTrial) +
-  geom_point(aes(time, thumbXvel), color = "red") +
-  geom_point(aes(time, thumbYvel), color = "darkgreen") +
-  geom_point(aes(time, thumbZvel), color = "blue") +
-  geom_point(aes(time, thumbVel), color = "black") +
-  geom_hline(yintercept = 50)
+
 
 ###  1.2 trajectory normalization ----
 # time normalization is tricky
