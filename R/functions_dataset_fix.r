@@ -25,7 +25,10 @@ kin.trialN <- function(dataset)
 #' @export
 kin.frameN <- function(dataset)
 {
-  dataset <- ddply(dataset, .(trialN), mutate, frameN=seq(1:length(trialN)))
+  dataset <- eval(substitute(
+    ddply(dataset, .(trialN), mutate, frameN=seq(1:length(trialN)))
+    , list(trialN = as.name(kinesis_parameters$dataCols[5]))))
+  names(dataset)[names(dataset) == "frameN"] <- kinesis_parameters$dataCols[2]
   return(dataset)
 }
 
@@ -67,7 +70,14 @@ kin.framesOccluded <- function(dataset)
 #' @export
 kin.time <- function(dataset, refreshRate = 85, time.unit = 1)
 {
-  dataset <- ddply(dataset, .(trialN), mutate, time = frameN * time.unit / refreshRate) # in milliseconds
+  assign("refreshRate", refreshRate, envir = kinesis_parameters)
+  assign("time.unit", time.unit, envir = kinesis_parameters)
+
+  dataset <- eval(substitute(
+    ddply(dataset, .(trialN), mutate, time = frameN * kinesis_parameters$time.unit / kinesis_parameters$refreshRate) # in milliseconds
+    , list(trialN = as.name(kinesis_parameters$dataCols[5]),
+           frameN = as.name(kinesis_parameters$dataCols[2]))))
+  names(dataset)[names(dataset) == "time"] <- kinesis_parameters$dataCols[3]
   return(dataset)
 }
 

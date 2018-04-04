@@ -1,83 +1,79 @@
-dataset <- rtgData
+# there are four columns that are expected
+get("dataCols", kinesis_parameters)
+# user can set them as well
+kin.setDataCols(subjName = "subjID", frameN = "frame", time = "t", deltaTime = "frameT")
+get("dataCols", kinesis_parameters)
+# they can be reset by calling the setter function empty
+kin.setDataCols()
+get("dataCols", kinesis_parameters)
 
+# user can have them under different names
 data.check.test <- function(dataset, refreshRate = 85, time.unit = 1, ...)
 {
-  # cat("Please input the name of the column coding for the trials:")
-  # trialCol <- readline()
-  #
-  # cat("Number of signals present in the dataset:")
-  # n_sgn <- as.numeric(as.character(readline()))
-  #
-  # sgnCols <- NULL
-  # for(sgn in 1:n_sgn)
-  # {
-  #   names_sgn_temp <- NULL
-  #   for(coord in c("x","y","z")){
-  #     cat("Name of column coding for ",coord," coord of signal #", sgn, ": ", sep="")
-  #     names_sgn_temp <- c(names_sgn_temp, readline())
-  #   }
-  #   sgnCols[[sgn]] <- names_sgn_temp
-  #   rm(names_sgn_temp)
-  # }
-  #
-  # # cleanup
-  # rm(sgn)
-  # rm(coord)
-  #
-  # reqCols <- c("subjName", "frameN", "frameT", "time", "signalOccluded")
-  # reqCols_check <- NULL
-  # for(rCol in reqCols)
-  # {
-  #   cat("Is ",rCol," column present? YES: type its name / NO: type 0 (zero):", sep="")
-  #   reqCols_check <- c(reqCols_check, readline())
-  # }
-  #
-
-  # # create working dataset
-  # wdataset <- dataset[names(dataset)%in%c(trialCol, unlist(sgnCols))]
+  # dependencies
+  require(plyr)
 
   # assign refreshRate & time.unit to global environment for looping inside ddply (temporary)
-  assign("refreshRate", refreshRate, envir = .GlobalEnv)
-  assign("time.unit", time.unit, envir = .GlobalEnv)
+  assign("refreshRate", refreshRate, envir = kinesis_parameters)
+  assign("time.unit", time.unit, envir = kinesis_parameters)
 
-  reqCols <- c("subjName","frameN", "time","deltaTime")
+  # get required columns
+  reqCols <- kinesis_parameters$dataCols
+  # look for missing columns
   missingCols <- reqCols[!reqCols %in% names(dataset)]
+
+  #### Fix missing columns (if any)
   if (length(missingCols) > 0) {
     cat("The following columns do not exist:\n")
     cat(missingCols, sep = ", ")
     cat("\n\nFixing...\n\n")
 
     # Fix subjName
-    if ("subjName" %in% missingCols) {
+    if (reqCols[1] %in% missingCols) {
       cat("Please type subject name:\n")
       dataset$subjName <- readline()
-      cat("subjName added.\n")
+      names(dataset)[names(dataset) == "subjName"] <- reqCols[1]
+      cat(reqCols[1], " added.\n", sep = "")
     }
 
     # Fix frameN
-    if ("frameN" %in% missingCols) {
+    if (reqCols[2] %in% missingCols) {
       dataset <- kin.frameN(dataset)
-      cat("frameN added.\n")
-    }
-
-    # Fix frameT
-    if ("deltaTime" %in% missingCols) {
-      # if time does not exists, create deltaTime
-      if("time" %in% missingCols){
-        dataset <- ddply(dataset, .(trialN), mutate,
-                         frameT = time.unit / refreshRate)
-      } else {
-        # else deltaTime is delta time
-        dataset <- ddply(dataset, .(trialN), mutate,
-                         frameT = c(NA, diff(time)))
-      }
-      cat("deltaTime added.\n")
+      cat(reqCols[2], " added.\n", sep = "")
     }
 
     # Fix time
-    if ("time" %in% missingCols) {
-      dataset <- kin.time(dataset, refreshRate, time.unit)
-      cat("time added.\n")
+    if (reqCols[3] %in% missingCols) {
+      dataset <- kin.time(dataset, kinesis_parameters$refreshRate, kinesis_parameters$time.unit)
+      cat(reqCols[3], " added.\n", sep = "")
+    }
+
+    # Fix deltaTime
+    if (reqCols[4] %in% missingCols) {
+      # if time does not exists, create deltaTime
+      if(reqCols[3] %in% missingCols){
+        dataset <- eval(substitute(
+          ddply(dataset, .(trialN), mutate,
+                frameT = kinesis_parameters$time.unit / kinesis_parameters$refreshRate)
+          , list(trialN = as.name(kinesis_parameters$dataCols[5]))))
+      } else {
+        # else deltaTime is delta time
+        dataset <- eval(substitute(
+          ddply(dataset, .(trialN), mutate,
+                frameT = c(NA, diff(time)))
+          , list(trialN = as.name(kinesis_parameters$dataCols[5]),
+                 time = as.name(kinesis_parameters$dataCols[3]))))
+      }
+      names(dataset)[names(dataset) == "frameT"] <- reqCols[4]
+      cat(reqCols[4], " added.\n", sep = "")
+    }
+
+    # Fix trialN
+    if (reqCols[5] %in% missingCols) {
+      # if trialN is missing, it is assumed that there is one trial
+      dataset$trialN <- 1
+      names(dataset)[names(dataset) == "trialN"] <- reqCols[5]
+      cat(reqCols[5], " added.\n", sep = "")
     }
 
     cat("\nDatabase fixed successfully.")
@@ -87,9 +83,12 @@ data.check.test <- function(dataset, refreshRate = 85, time.unit = 1, ...)
     cat("\nDatabase looks good.")
   }
 
-  # remove refreshRate & time.unit from global environment
-  remove(refreshRate, envir = .GlobalEnv)
-  remove(time.unit, envir = .GlobalEnv)
-
   return(dataset)
 }
+
+kin.setDataCols(subjName = "subjID", frameN = "frame", time = "t", deltaTime = "frametime")
+testD <- data.check.test(rtgData_bad)
+test
+
+names(testD)
+head(testD)
