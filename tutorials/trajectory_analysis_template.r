@@ -23,7 +23,7 @@ for(tN in unique(testData$trialN))
   #### signals analysis
   # set start
   start <- c(267,-332,-11.5)
-  # set end
+  # set end (depends on trial's conditions)
   kmData <- testTrial[c("thumbXraw","thumbYraw","thumbZraw","time")]
   km.res <- as.data.frame(kmeans(kmData, 2)$centers)
   km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
@@ -38,7 +38,7 @@ for(tN in unique(testData$trialN))
   thumbData <- kin.signal.analysis(thumb.signal, "thumb", start, end, deltaTime = refreshRate)
 
   #### merge back
-  trialData <- cbind(testTrial[c("subjName","trialN","frameN","frameT","time")], indexData, thumbData)
+  trialData <- cbind(testTrial[c("subjName","trialN","frameN","deltaTime","time")], indexData, thumbData)
 
   #### crop the inbound portion of trajectory
   # set velocity threshold

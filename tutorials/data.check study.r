@@ -1,13 +1,3 @@
-# there are four columns that are expected
-get("dataCols", kinesis_parameters)
-# user can set them as well
-kin.setDataCols(subjName = "subjID", frameN = "frame", time = "t", deltaTime = "frameT")
-get("dataCols", kinesis_parameters)
-# they can be reset by calling the setter function empty
-kin.setDataCols()
-get("dataCols", kinesis_parameters)
-
-# user can have them under different names
 data.check.test <- function(dataset, refreshRate = 85, time.unit = 1, ...)
 {
   # dependencies

@@ -32,7 +32,7 @@
 #' rtgData$frameT
 #'
 #' @export
-data.check <- function(dataset, refreshRate = 85, time.unit = 1, ...)
+data.check <- function(dataset, refreshRate = 85, time.unit = 1, check.only = F, ...)
 {
   # dependencies
   require(plyr)
@@ -50,57 +50,66 @@ data.check <- function(dataset, refreshRate = 85, time.unit = 1, ...)
   if (length(missingCols) > 0) {
     cat("The following columns do not exist:\n")
     cat(missingCols, sep = ", ")
-    cat("\n\nFixing...\n\n")
 
-    # Fix subjName
-    if (reqCols[1] %in% missingCols) {
-      cat("Please type subject name:\n")
-      dataset$subjName <- readline()
-      names(dataset)[names(dataset) == "subjName"] <- reqCols[1]
-      cat(reqCols[1], " added.\n", sep = "")
-    }
+    if(!check.only)
+    {
+      cat("\n\nFixing...\n\n")
 
-    # Fix frameN
-    if (reqCols[2] %in% missingCols) {
-      dataset <- kin.frameN(dataset)
-      cat(reqCols[2], " added.\n", sep = "")
-    }
-
-    # Fix time
-    if (reqCols[3] %in% missingCols) {
-      dataset <- kin.time(dataset, kinesis_parameters$refreshRate, kinesis_parameters$time.unit)
-      cat(reqCols[3], " added.\n", sep = "")
-    }
-
-    # Fix deltaTime
-    if (reqCols[4] %in% missingCols) {
-      # if time does not exists, create deltaTime
-      if(reqCols[3] %in% missingCols){
-        dataset <- eval(substitute(
-          ddply(dataset, .(trialN), mutate,
-                frameT = kinesis_parameters$time.unit / kinesis_parameters$refreshRate)
-          , list(trialN = as.name(kinesis_parameters$dataCols[5]))))
-      } else {
-        # else deltaTime is delta time
-        dataset <- eval(substitute(
-          ddply(dataset, .(trialN), mutate,
-                frameT = c(NA, diff(time)))
-          , list(trialN = as.name(kinesis_parameters$dataCols[5]),
-                 time = as.name(kinesis_parameters$dataCols[3]))))
+      # Fix subjName
+      if (reqCols[1] %in% missingCols) {
+        cat("Please type subject name:\n")
+        dataset$subjName <- readline()
+        names(dataset)[names(dataset) == "subjName"] <- reqCols[1]
+        cat(reqCols[1], " added.\n", sep = "")
       }
-      names(dataset)[names(dataset) == "frameT"] <- reqCols[4]
-      cat(reqCols[4], " added.\n", sep = "")
-    }
 
-    # Fix trialN
-    if (reqCols[5] %in% missingCols) {
-      # if trialN is missing, it is assumed that there is one trial
-      dataset$trialN <- 1
-      names(dataset)[names(dataset) == "trialN"] <- reqCols[5]
-      cat(reqCols[5], " added.\n", sep = "")
-    }
+      # Fix frameN
+      if (reqCols[2] %in% missingCols) {
+        dataset <- kin.frameN(dataset)
+        cat(reqCols[2], " added.\n", sep = "")
+      }
 
-    cat("\nDatabase fixed successfully.")
+      # Fix time
+      if (reqCols[3] %in% missingCols) {
+        dataset <- kin.time(dataset, kinesis_parameters$refreshRate, kinesis_parameters$time.unit)
+        cat(reqCols[3], " added.\n", sep = "")
+      }
+
+      # Fix deltaTime
+      if (reqCols[4] %in% missingCols) {
+        # if time does not exists, create deltaTime
+        if(reqCols[3] %in% missingCols){
+          dataset <- eval(substitute(
+            ddply(dataset, .(trialN), mutate,
+                  frameT = kinesis_parameters$time.unit / kinesis_parameters$refreshRate)
+            , list(trialN = as.name(kinesis_parameters$dataCols[5]))))
+        } else {
+          # else deltaTime is delta time
+          dataset <- eval(substitute(
+            ddply(dataset, .(trialN), mutate,
+                  frameT = c(NA, diff(time)))
+            , list(trialN = as.name(kinesis_parameters$dataCols[5]),
+                   time = as.name(kinesis_parameters$dataCols[3]))))
+        }
+        names(dataset)[names(dataset) == "frameT"] <- reqCols[4]
+        cat(reqCols[4], " added.\n", sep = "")
+      }
+
+      # Fix trialN
+      if (reqCols[5] %in% missingCols) {
+        # if trialN is missing, it is assumed that there is one trial
+        dataset$trialN <- 1
+        names(dataset)[names(dataset) == "trialN"] <- reqCols[5]
+        cat(reqCols[5], " added.\n", sep = "")
+      }
+
+      cat("\nDatabase fixed successfully.")
+    } else
+    {
+      opt <- options(show.error.messages=FALSE)
+      on.exit(options(opt))
+      stop()
+    }
   }
   else {
 
