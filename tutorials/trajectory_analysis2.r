@@ -3,52 +3,59 @@ options(scipen = 1, digits = 3)
 libraries()
 library(cowplot)
 
-# PROCEDURE FROM GALLIVAN and CHAPMAN 2014
-
 #### Prepare the dataset ####
 # keep only useful columns
 usefCols <- c("trialN","indexXraw","indexYraw","indexZraw","thumbXraw","thumbYraw","thumbZraw")
 # check dataset
-testData <- data.check.test(rtgData_bad[usefCols])
+testData <- data.check(rtgData_bad[usefCols])
 test
 
+#### main dataset
 graspData <- NULL
+
+#### Analysis loop ####
 for(tN in unique(testData$trialN))
 {
   cat("---- trial #", tN, ". ----\n\n")
-  # trial
+  #### select trial
   testTrial <- subset(testData, trialN == tN)
-  # signals analysis
-  start <- c(267,-332,-11.5)
 
+  #### signals analysis
+  # set start
+  start <- c(267,-332,-11.5)
+  # set end
   kmData <- testTrial[c("thumbXraw","thumbYraw","thumbZraw","time")]
   km.res <- as.data.frame(kmeans(kmData, 2)$centers)
   km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
-
   end <- as.numeric(km.res[km.res$moment=="end",1:3])
+  # refresh rate
   refreshRate <- 1/85
-  return_threshold <- -100
-
+  # prepare signals datasets
   index.signal <- testTrial[,c("indexXraw","indexYraw","indexZraw")]
   thumb.signal <- testTrial[,c("thumbXraw","thumbYraw","thumbZraw")]
+  # analysis: repair, filter, translate, rotate
   indexData <- kin.signal.analysis(index.signal, "index", start, end, deltaTime = refreshRate)
   thumbData <- kin.signal.analysis(thumb.signal, "thumb", start, end, deltaTime = refreshRate)
 
-  # merge back
+  #### merge back
   trialData <- cbind(testTrial[c("subjName","trialN","frameN","frameT","time")], indexData, thumbData)
 
-  # crop out the inbound portion of trajectory
+  #### crop the inbound portion of trajectory
+  # set velocity threshold
   returnVel_threshold <- -100
-  # crop return
+  # crop
   trialData <- subset(trialData, thumbZvel > returnVel_threshold & indexZvel > returnVel_threshold)
 
-  # set onset time
+  #### onset time
+  # set velocity threshold
   onsetVel_threshold <- 100
+  # find onset frame
   onsetFrame <- kin.find.onsetTime(trialData$thumbVel, onsetVel_threshold)
-  # crop out trajectory before onset
+  # crop trajectory before onset
   trialData <- subset(trialData, frameN >= onsetFrame)
 
-  # set offset time based on vel,acc,jerk
+  #### offset time
+  # heuristic based on resultant vector of vel,acc,jerk
   # calculate jerk
   trialData$indexJerk <- kin.sgFilter(kin.sgFilter(trialData$indexVel, m = 1, ts = refreshRate), p = 12, ts = refreshRate)
   trialData$thumbJerk <- kin.sgFilter(kin.sgFilter(trialData$thumbVel, m = 1, ts = refreshRate), p = 12, ts = refreshRate)
@@ -56,27 +63,32 @@ for(tN in unique(testData$trialN))
   trialData$thumbVelAccJerk.res <- with(trialData, sqrt(thumbVel^2 + thumbAcc^2 + thumbJerk^2))
   trialData$indexVelAccJerk.res <- with(trialData, sqrt(thumbVel^2 + thumbAcc^2 + thumbJerk^2))
   trialData$index_thumbVelAccJerk.res <- with(trialData, sqrt(thumbVelAccJerk.res^2 + indexVelAccJerk.res^2))
-  # find offest time
-  # theoretical z distance
+  # z distance after rotation
   ztheor <- round(kin.rotate.trajectory(as.data.frame(t(end-start)), end-start), 2)[3]
-  # we look for the offset in the second half of the trajectory
-  offsetFrame <- with(subset(trialData, thumbZ > ztheor/2), frameN[match(kin.min(index_thumbVelAccJerk.res), index_thumbVelAccJerk.res)])
-  # crop out trajectory after offset
+  # we look for the offset frame in the second half of the trajectory
+  offsetFrame <- with(subset(trialData, thumbZ > ztheor/2),
+                      frameN[match(kin.min(index_thumbVelAccJerk.res), index_thumbVelAccJerk.res)])
+  # crop trajectory after offset
   trialData <- subset(trialData, frameN <= offsetFrame)
 
-  # space normalization
+  #### space normalization
+  # euclidean distance of thumb to its final position
   trialData$thuDist <- sqrt((trialData$thumbX - tail(trialData$thumbX, 1))^2 +
                               (trialData$thumbY - tail(trialData$thumbY, 1))^2 +
                               (trialData$thumbZ - tail(trialData$thumbZ, 1))^2
   )
-  # bin that distance
+  # bin thuDist
   binN <- 100
   trialData$thuDistB <- with(trialData, cut(thuDist, breaks = binN, labels = F))
 
+  #### other specs
   trialData$objectZ <- ifelse(end[3] > -300, 270, 350)
+
+  #### append to main dataset
   graspData <- rbind(graspData, trialData)
 }
 
+#### Results ####
 unique(graspData$trialN)
 
 ggplot(data = graspData) +
