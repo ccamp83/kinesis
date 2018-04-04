@@ -15,11 +15,17 @@ test
 graspData <- NULL
 for(tN in unique(testData$trialN))
 {
+  cat("---- trial #", tN, ". ----\n\n")
   # trial
   testTrial <- subset(testData, trialN == tN)
   # signals analysis
   start <- c(267,-332,-11.5)
-  end <- c(34.8,-53.4,-283)
+
+  kmData <- testTrial[c("thumbXraw","thumbYraw","thumbZraw","time")]
+  km.res <- as.data.frame(kmeans(kmData, 2)$centers)
+  km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
+
+  end <- as.numeric(km.res[km.res$moment=="end",1:3])
   refreshRate <- 1/85
   return_threshold <- -100
 
@@ -67,14 +73,19 @@ for(tN in unique(testData$trialN))
   binN <- 100
   trialData$thuDistB <- with(trialData, cut(thuDist, breaks = binN, labels = F))
 
+  trialData$objectZ <- ifelse(end[3] > -300, 270, 350)
   graspData <- rbind(graspData, trialData)
 }
 
 unique(graspData$trialN)
 
-ggplot(data = subset(graspData, trialN==46)) +
+ggplot(data = graspData) +
   geom_point(aes(indexX, indexZ), color = "red") +
   geom_point(aes(thumbX, thumbZ), color = "blue") +
+  facet_grid(. ~ objectZ) +
   coord_fixed()
 
-
+ggplot(data = graspData) +
+  geom_point(aes(-thuDist, indexZ), color = "red") +
+  geom_point(aes(-thuDist, thumbZ), color = "blue") +
+  facet_grid(. ~ objectZ)
