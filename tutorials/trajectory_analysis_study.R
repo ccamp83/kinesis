@@ -252,9 +252,16 @@ ggplot(data = testTrial) +
   geom_point(aes(time, thumbZ), color = "blue") +
   geom_point(aes(time, indexZ), color = "red")
 
+#    1.1.5 curvature ---
+testTrial$indexCurvature <- kin.signal.curvature(testTrial[c("indexX","indexY","indexZ")], deltaTime = 1/85)
+testTrial$thumbCurvature <- kin.signal.curvature(testTrial[c("thumbX","thumbY","thumbZ")], deltaTime = 1/85)
+
+#    1.1.5 total trajectory length ---
+testTrial$indexCurveLength <- kin.signal.arclength(testTrial[c("indexX","indexY","indexZ")])
+testTrial$thumbCurveLength <- kin.signal.arclength(testTrial[c("thumbX","thumbY","thumbZ")])
+
 ###  1.2 trajectory normalization ----
-# time normalization is tricky
-# so opt for space normalization
+# space normalization
 
 # first calculate euclidean distance of a reference trajectory to its final position
 # in this example's case, it's the thumb
@@ -265,18 +272,6 @@ testTrial$thuDist <- sqrt((testTrial$thumbX - tail(testTrial$thumbX, 1))^2 +
 # bin that distance
 binN <- 100
 testTrial$thuDistB <- with(testTrial, cut(thuDist, breaks = binN, labels = F))
-
-curvatureData.ind <- testTrial[c("indexX","indexY","indexZ")]
-curvatureData.ind$indexXvel <- with(curvatureData.ind, kin.sgFilter(indexX,m=1, ts = 1/85))
-curvatureData.ind$indexYvel <- with(curvatureData.ind, kin.sgFilter(indexY,m=1, ts = 1/85))
-curvatureData.ind$indexZvel <- with(curvatureData.ind, kin.sgFilter(indexZ,m=1, ts = 1/85))
-curvatureData.ind$indexXacc <- with(curvatureData.ind, kin.sgFilter(indexX,m=2, ts = 1/85))
-curvatureData.ind$indexYacc <- with(curvatureData.ind, kin.sgFilter(indexY,m=2, ts = 1/85))
-curvatureData.ind$indexZacc <- with(curvatureData.ind, kin.sgFilter(indexZ,m=2, ts = 1/85))
-
-k = with(curvatureData.ind, abs())
-
-
 
 ##   1.2.1 space normalization through Functional Data Analysis (FDA) ----
 # fit data with mathematical function
@@ -289,10 +284,45 @@ k = with(curvatureData.ind, abs())
 #### 2. single participant's average of many trials within a given experimental condition ####
 #### 3. group average of that condition (average of all participants' mean trajectories) ####
 
-# find core kinematics:
-# velocity peak
-# acceleration peak
-# deceleration peak
+#### extract kinematic parameters ####
+# From melmoth & grant 2006
+
+# --- general kinematics
+onset <- min(testTrial$time)
+offset <- max(testTrial$time)
+movTime <- offset-onset
+
+# ---- reach dynamics
+# maximum acceleration
+MAcc <- max(testTrial$indexAcc)
+# maximum velocity
+MVel <- max(testTrial$indexVel)
+# maximum deceleration
+MDec <- min(testTrial$indexAcc)
+
+# time to maximum acceleration
+timeMAcc <- testTrial$time[which.max(testTrial$indexAcc)]
+# time to maximum velocity
+timeMVel <- testTrial$time[which.max(testTrial$indexVel)]
+# time to maximum deceleration
+timeMDec <- testTrial$time[which.min(testTrial$indexAcc)]
+
+# time from max acceleration to max velocity
+timeMAccToMVel <- timeMVel - timeMAcc
+# time from max velocity to max deceleration
+timeMVelToMDec <- timeMDec - timeMVel
+# time from max deceleration to movement offset
+timeMDecToOffset <- offset - timeMDec
+
+# ---- spatial reach kinematics
+pathLength <- max(testTrial$indexCurveLength)
+MdeviationX <- max(testTrial$indexX)
+MdeviationY <- max(testTrial$indexY)
+
+# ---- final 3D position
+FX = testTrial$indexX[testTrial$time == offset]
+FY = testTrial$indexY[testTrial$time == offset]
+FZ = testTrial$indexZ[testTrial$time == offset]
 
 #### check velocity ####
 # check if there are anomalies in the calculation of velocity and acceleration that might be due to bad sampling

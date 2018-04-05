@@ -1,6 +1,5 @@
 options(scipen = 1, digits = 3)
 
-libraries()
 library(cowplot)
 
 #### Prepare the dataset ####
@@ -11,11 +10,15 @@ testData <- data.check(rtgData_bad[usefCols])
 test
 
 #### main dataset
-graspData <- NULL
+trajData <- NULL
+reach_paramData <- NULL
+grasp_paramData <- NULL
+timeinfoData <- NULL
 
 #### Analysis loop ####
 for(tN in unique(testData$trialN))
 {
+  # tN <- unique(testData$trialN)[1]
   cat("---- trial #", tN, ". ----\n\n")
   #### select trial
   testTrial <- subset(testData, trialN == tN)
@@ -81,23 +84,56 @@ for(tN in unique(testData$trialN))
   binN <- 100
   trialData$thuDistB <- with(trialData, cut(thuDist, breaks = binN, labels = F))
 
+  #### grasp analysis
+  graspData <- kin.grasp.analysis(data = trialData, signals = c("index","thumb"), deltaTime = refreshRate)
+
+  #### merge reaching and grasp analysis
+  trialData <- cbind(trialData, graspData)
+
   #### other specs
   trialData$objectZ <- ifelse(end[3] > -300, 270, 350)
 
-  #### append to main dataset
-  graspData <- rbind(graspData, trialData)
+  #### append trajectory data to main trajectory dataset
+  trajData <- rbind(trajData, trialData)
+
+  #### extract parameters
+  extractData <- kin.extract.parameters(trialData, c("index","thumb"), grasp = T)
+
+  #### append reach parameters to main dataset
+  trialParams.r <- extractData$reach_parameters
+  trialParams.r$trialN <- tN
+  reach_paramData <- rbind(reach_paramData, trialParams.r)
+
+  #### append reach parameters to main dataset
+  trialParams.g <- extractData$grasp_parameters
+  trialParams.g$trialN <- tN
+  grasp_paramData <- rbind(grasp_paramData, trialParams.g)
+
+  #### append time info to main dataset
+  timeinfoParams <- extractData$time_info
+  timeinfoParams$trialN <- tN
+  timeinfoData <- rbind(timeinfoData, timeinfoParams)
 }
 
-#### Results ####
-unique(graspData$trialN)
+reach_paramData
+grasp_paramData
+timeinfoData
 
-ggplot(data = graspData) +
+#### Results ####
+unique(trajData$trialN)
+
+ggplot(data = trajData) +
   geom_point(aes(indexX, indexZ), color = "red") +
   geom_point(aes(thumbX, thumbZ), color = "blue") +
   facet_grid(. ~ objectZ) +
   coord_fixed()
 
-ggplot(data = graspData) +
+ggplot(data = trajData) +
   geom_point(aes(-thuDist, indexZ), color = "red") +
   geom_point(aes(-thuDist, thumbZ), color = "blue") +
   facet_grid(. ~ objectZ)
+
+ggplot(aes(trialN, movTime), data = timeinfoData) + geom_point()
+
+ggplot(aes(trialN, MdeviationX, color = signal), data = reach_paramData) + geom_point() + geom_smooth(method = lm)
+ggplot(aes(trialN, MdeviationY, color = signal), data = reach_paramData) + geom_point() + geom_smooth(method = lm)

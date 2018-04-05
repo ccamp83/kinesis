@@ -1,10 +1,7 @@
-# load required libraries ----
-libraries()
-
 #### BASIC FIXES TO DATASET ####
 
 ### setting dataset columns ----
-# there are five columns that are expected
+# five columns are expected
 get("dataCols", kinesis_parameters)
 # user can set them
 kin.setDataCols(subjName = "subjID", frameN = "frame", time = "t", deltaTime = "refreshTime")
