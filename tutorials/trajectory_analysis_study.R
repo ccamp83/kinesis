@@ -1,6 +1,5 @@
 options(scipen = 1, digits = 3)
 
-libraries()
 library(cowplot)
 
 # PROCEDURE FROM GALLIVAN and CHAPMAN 2014
@@ -11,8 +10,6 @@ usefCols <- c("trialN","indexXraw","indexYraw","indexZraw","thumbXraw","thumbYra
 # Fix dataset
 testData <- data.check(rtgData_bad[usefCols])
 test
-# is there missing data for each digit in this dataset?
-any(testData$fingersOccluded==1) # YES
 
 #### 1. individual trial analysis ####
 ###  1.1 extract ROI ----
@@ -20,21 +17,10 @@ any(testData$fingersOccluded==1) # YES
 # inpaint_nans function in matlab
 
 # select one trial with missing frames
-# flag trials with missing frames
-testData <- ddply(testData, .(trialN), mutate,
-                  missing.frames = any(framesOccluded > 0))
-# extract these trials number
-trial.na.frame <- unique(subset(testData, missing.frames)$trialN)
-# pick a random bad trial
-(badTrialNum <- sample(trial.na.frame, 1))
-# from now on we continue analyzing this trial
-testTrial <- subset(testData, trialN == badTrialNum)
+testTrial <- subset(testData, trialN == 50)
 # testTrial <- subset(testData, trialN == badTrialNum)
 # plot the data
 # ggplot(aes(frameN, thumbXraw), data = testTrial) + geom_point() # thumb data is bad
-
-# how many bad frame are there?
-max(testTrial$framesOccluded)
 
 # repair missing frames
 testTrial$indexXrep <- with(testTrial, kin.signal.repair(indexXraw, maxFrames= 20))
@@ -258,7 +244,7 @@ testTrial <- subset(testTrial, frameN <= offsetFrame)
 # columns to keep
 testTrial.backup1 <- testTrial
 keepCols <- c("trialN","indexX","indexY","indexZ","thumbX","thumbY","thumbZ",
-              "subjName","frameN","frameT","time",
+              "subjName","frameN","deltaTime","time",
               "indexVel","indexAcc","thumbVel","thumbAcc")
 testTrial <- testTrial.backup1[keepCols]
 
@@ -280,7 +266,33 @@ testTrial$thuDist <- sqrt((testTrial$thumbX - tail(testTrial$thumbX, 1))^2 +
 binN <- 100
 testTrial$thuDistB <- with(testTrial, cut(thuDist, breaks = binN, labels = F))
 
+curvatureData.ind <- testTrial[c("indexX","indexY","indexZ")]
+curvatureData.ind$indexXvel <- with(curvatureData.ind, kin.sgFilter(indexX,m=1, ts = 1/85))
+curvatureData.ind$indexYvel <- with(curvatureData.ind, kin.sgFilter(indexY,m=1, ts = 1/85))
+curvatureData.ind$indexZvel <- with(curvatureData.ind, kin.sgFilter(indexZ,m=1, ts = 1/85))
+curvatureData.ind$indexXacc <- with(curvatureData.ind, kin.sgFilter(indexX,m=2, ts = 1/85))
+curvatureData.ind$indexYacc <- with(curvatureData.ind, kin.sgFilter(indexY,m=2, ts = 1/85))
+curvatureData.ind$indexZacc <- with(curvatureData.ind, kin.sgFilter(indexZ,m=2, ts = 1/85))
 
+k = with(curvatureData.ind, abs())
+
+
+
+##   1.2.1 space normalization through Functional Data Analysis (FDA) ----
+# fit data with mathematical function
+# for each trial, the discrete data in the extracted reach trajectory is fit using B-splines
+# In our work, order six splines are fit to each of the three dimensions (x, y, z) of the motion data with
+# a spline at every data point. The data are then smoothed using a roughness penalty on the fourth derivative (λ = 10−18, within
+# 0.00001 of the generalized cross-validation estimate, Ramsay and Silverman, 2005), which allows for control of the smoothness of
+# the second derivative. This process generates the mathematical definition of each dimension of data (x, y, or z) across time.
+
+#### 2. single participant's average of many trials within a given experimental condition ####
+#### 3. group average of that condition (average of all participants' mean trajectories) ####
+
+# find core kinematics:
+# velocity peak
+# acceleration peak
+# deceleration peak
 
 #### check velocity ####
 # check if there are anomalies in the calculation of velocity and acceleration that might be due to bad sampling
@@ -309,20 +321,3 @@ testTrial$indexZ <- with(testTrial, kin.signal.repair(indexZ, maxFrames= 20))
 testTrial$thumbX <- with(testTrial, kin.signal.repair(thumbX, maxFrames= 20))
 testTrial$thumbY <- with(testTrial, kin.signal.repair(thumbY, maxFrames= 20))
 testTrial$thumbZ <- with(testTrial, kin.signal.repair(thumbZ, maxFrames= 20))
-
-
-##   1.2.1 space normalization through Functional Data Analysis (FDA) ----
-# fit data with mathematical function
-# for each trial, the discrete data in the extracted reach trajectory is fit using B-splines
-# In our work, order six splines are fit to each of the three dimensions (x, y, z) of the motion data with
-# a spline at every data point. The data are then smoothed using a roughness penalty on the fourth derivative (λ = 10−18, within
-# 0.00001 of the generalized cross-validation estimate, Ramsay and Silverman, 2005), which allows for control of the smoothness of
-# the second derivative. This process generates the mathematical definition of each dimension of data (x, y, or z) across time.
-
-#### 2. single participant's average of many trials within a given experimental condition ####
-#### 3. group average of that condition (average of all participants' mean trajectories) ####
-
-# find core kinematics:
-# velocity peak
-# acceleration peak
-# deceleration peak

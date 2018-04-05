@@ -11,12 +11,12 @@ libraries <- function(update=F)
     "Hmisc",
     "plyr",         # arrange dataset
     "ggplot2",      # generate plots
-    "fields",       # sreg function for smoothing
-    "gridExtra",    # generate plots
-    "grid",         # generate plots
+    # "fields",       # sreg function for smoothing
+    # "gridExtra",    # generate plots
+    # "grid",         # generate plots
     "rgl",          # opengl - ubuntu 14.04 requires "sudo apt-get install libX11-dev freeglut3 freeglut3-dev libxml2-dev" to install this package
     "roxygen2",     # generate package
-    "parallel",     # parallel computing
+    # "parallel",     # parallel computing
     "signal"        # butterworth filter
   )
 

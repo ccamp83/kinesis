@@ -34,9 +34,6 @@
 #' @export
 data.check <- function(dataset, refreshRate = 85, time.unit = 1, check.only = F, ...)
 {
-  # dependencies
-  require(plyr)
-
   # assign refreshRate & time.unit to global environment for looping inside ddply (temporary)
   assign("refreshRate", refreshRate, envir = kinesis_parameters)
   assign("time.unit", time.unit, envir = kinesis_parameters)
