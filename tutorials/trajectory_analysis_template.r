@@ -115,9 +115,9 @@ for(tN in unique(testData$trialN))
   timeinfoData <- rbind(timeinfoData, timeinfoParams)
 }
 
-reach_paramData
-grasp_paramData
-timeinfoData
+head(reach_paramData)
+head(grasp_paramData)
+head(timeinfoData)
 
 #### Results ####
 unique(trajData$trialN)
@@ -137,3 +137,12 @@ ggplot(aes(trialN, movTime), data = timeinfoData) + geom_point()
 
 ggplot(aes(trialN, MdeviationX, color = signal), data = reach_paramData) + geom_point() + geom_smooth(method = lm)
 ggplot(aes(trialN, MdeviationY, color = signal), data = reach_paramData) + geom_point() + geom_smooth(method = lm)
+
+ggplot(data=trajData) +
+  geom_point(aes(time, GOF*180/pi, color = objectZ))
+
+ggplot(data=trajData) +
+  geom_point(aes(time, GOT*180/pi, color = objectZ))
+
+ggplot(data=trajData) +
+  geom_point(aes(time, GOS*180/pi, color = objectZ))

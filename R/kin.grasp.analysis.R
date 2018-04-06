@@ -34,10 +34,13 @@ kin.grasp.analysis <- function(data, signals, deltaTime)
   # 3D Grip Orientation (raw)
   # GOF is the angle between the parallel projection of GA and the x axis on the Frontal (coronal) plane
   GOF <- atan2( (temp[,2]-temp[,5]), (temp[,1]-temp[,4]) )
+  GOF[GOF<0] <- GOF[GOF<0]+2*pi
   # GOT is the angle between the parallel projection of GA and the z axis on the Transverse plane
   GOT <- atan2( (temp[,3]-temp[,6]), (temp[,1]-temp[,4]) )
+  GOT[GOT<0] <- GOT[GOT<0]+2*pi
   # GOS is the angle between the parallel projection of GA and the z axis on the Sagittal plane
   GOS <- atan2( (temp[,2]-temp[,5]), (temp[,3]-temp[,6]) )
+  GOS[GOS<0] <- GOS[GOS<0]+2*pi
 
   output <- data.frame(GA, GPX, GPY, GPZ, GPVel, GOF, GOT, GOS)
 }
