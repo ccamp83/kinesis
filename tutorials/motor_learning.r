@@ -17,9 +17,9 @@ e.aiming <- function(rot_n, rot.est_n, s.actual_n, s.desired_n) { (rot_n - rot.e
 ffmod.update <- function(A, B, rot.est_n, e.targ_n) { A*rot.est_n + B*e.targ_n }
 
 # memory term (retention)
-A = 1
+A = .38
 # learning rate / sensitivity to error
-B = .02
+B = .012
 
 ## ----------- Simulate data ----------- ##
 
@@ -27,8 +27,9 @@ B = .02
 baseline <- expand.grid(trial = 1:120,
                         rot_n = 0)
 # adaptation
+rotation_theta <- -30
 adaptation <- expand.grid(trial = 120+(1:320),
-                          rot_n = -45)
+                          rot_n = rotation_theta)
 # washout
 washout <- expand.grid(trial = 120+320+(1:120),
                        rot_n = 0)
@@ -50,5 +51,11 @@ for(tr in 1:nrow(simData))
   }
 }
 head(simData)
-ggplot(aes(trial, error), data = simData) + geom_line() + geom_point()
-ggplot(aes(trial, rot.est), data = simData) + geom_line() + geom_point()
+ggplot(aes(trial, rot.est), data = simData) + geom_line() + geom_point() + coord_cartesian(ylim = c(-rotation_theta, rotation_theta))
+ggplot(aes(trial, error), data = simData) + geom_line() + geom_point() + coord_cartesian(ylim = c(-rotation_theta, rotation_theta))
+
+## ----------- Fit data ----------- ##
+simData$prev_rot.est <- c(NA, simData$rot.est[1:(nrow(simData)-1)])
+# head(simData[simData$rot_n!=0,])
+nls(formula = rot.est ~ A*prev_rot.est + B*error, data = simData, start = c(A = 0, B = 0))
+
