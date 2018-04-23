@@ -2,8 +2,6 @@
 #' @export
 kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxFrames = 20, deltaTime)
 {
-  # make backup
-  signal.backup <- signal
   # name of signal
   names(signal) <- paste(signal.name, c("X","Y","Z"), "raw", sep = "")
 

@@ -96,8 +96,10 @@ kin.globalTime <- function(dataset)
 #' @export
 kin.signal.missing <- function(x, criterion=NULL, delete.static.positions = F)
 {
+  v <- x
+
   if(delete.static.positions){
-    v <- c(x[1], ifelse(abs(c(NA, diff(x))) < .000001, NA, x)[-1])
+    v <- c(v[1], ifelse(abs(c(NA, diff(v))) < .000001, NA, v)[-1])
   }
   v[v%in%criterion] <- NA
   cat(sum(is.na(v)), " missing frames detected.\n", sep = "")

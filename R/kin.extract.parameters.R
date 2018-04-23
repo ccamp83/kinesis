@@ -149,9 +149,8 @@ kin.extract.parameters <- function(data, signals, grasp = F)
 
     output.g$signal <- factor("grasp")
     output.g <- output.g[c(ncol(output.g), 1:(ncol(output.g)-1))]
+    output$grasp_parameters <- output.g
   }
-
-  output$grasp_parameters <- output.g
 
   return(output)
 }
