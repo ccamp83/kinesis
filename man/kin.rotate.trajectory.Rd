@@ -11,6 +11,9 @@ kin.rotate.trajectory(data, end)
 
 \item{end}{a 3-length vector with x,y,z coordinates of the trajectory endpoint}
 }
+\description{
+Rotate trajectory
+}
 \details{
 The trajectory is assumed to start at origin (0,0,0)
 and terminate at a point (0,0,z)

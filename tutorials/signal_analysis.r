@@ -40,4 +40,4 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
 }
 
 head(signal)
-head(kin.signal.analysis(signal, "thumb", start, end, deltaTime = refreshRate, returnVel_threshold = return_threshold))
+head(kin.signal.analysis(signal, "thumb", start, end, deltaTime = refreshRate))
