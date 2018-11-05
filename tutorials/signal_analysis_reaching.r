@@ -1,5 +1,11 @@
-# kin.signal.analysis
-#' @export
+# original 3D signal
+signal <- reachData[reachData$trialN==50, c("handX","handZ","refreshRate")]
+# parameters
+signal.name <- "hand"
+start <- c(0,0,0)
+end <- c(0,0,.1)
+deltaTime <- 1/85
+
 kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxFrames = 20, deltaTime)
 {
   # make backup
@@ -62,3 +68,6 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
 
   return(signal)
 }
+
+head(signal)
+head(kin.signal.analysis(signal, "hand", start, end, deltaTime = refreshRate))
