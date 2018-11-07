@@ -1,3 +1,5 @@
+library(kinesis)
+
 # original 3D signal
 signal <- reachData[reachData$trialN==50, c("handX","handZ","refreshRate")]
 # parameters

@@ -20,18 +20,21 @@ testData <- data.check(reachData)
 
 # select one trial with missing frames
 testTrial <- subset(testData, trialN == 50)
+testTrial$handY <- 0
 # testTrial <- subset(testData, trialN == badTrialNum)
 # plot the data
 # ggplot(aes(frameN, handX), data = testTrial) + geom_point() # handX data is good
 
 # check for missing frames
 testTrial$handXrep <- with(testTrial, kin.signal.repair(handX, maxFrames= 20))
+testTrial$handYrep <- with(testTrial, kin.signal.repair(handY, maxFrames= 20))
 testTrial$handZrep <- with(testTrial, kin.signal.repair(handZ, maxFrames= 20))
 
 ##   1.1.2 filter ----
 #    Savitzky-Golay filter ----
 # 3rd order
 testTrial$handXsg <- with(testTrial, kin.sgFilter(handXrep, ts = refreshRate))
+testTrial$handYsg <- with(testTrial, kin.sgFilter(handYrep, ts = refreshRate))
 testTrial$handZsg <- with(testTrial, kin.sgFilter(handZrep, ts = refreshRate))
 
 # ggplot(data = testTrial) +
@@ -40,6 +43,7 @@ testTrial$handZsg <- with(testTrial, kin.sgFilter(handZrep, ts = refreshRate))
 
 #    1.2.2.1 apply filter ----
 testTrial$handX <- testTrial$handXsg
+testTrial$handY <- testTrial$handYsg
 testTrial$handZ <- testTrial$handZsg
 
 ##   1.1.3 translate and rotate to have all trajectories going in the same direction ----
@@ -56,7 +60,7 @@ testTrial$handZ <- testTrial$handZsg
 handData.backup <- testTrial[,c("handX","handY","handZ")]
 # if any of the column is missing, it is set to zero
 # dataset containing to-be-rotated fingers positions
-rotData.backup <- rbind(indData.backup, setNames(thuData.backup, names(indData.backup)))
+rotData.backup <- handData.backup
 
 # define start and end of movement
 # case unknown
@@ -67,19 +71,14 @@ rotData.backup <- rbind(indData.backup, setNames(thuData.backup, names(indData.b
 # of each position of each finger
 
 # CASE 1: whole grasp
-kmData <- cbind(rotData.backup, time = testTrial[,"time"])
-km.res <- as.data.frame(kmeans(kmData, 2)$centers)
-km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
 # translate the trajectory to origin (0,0,0)
-transData <- km.res[km.res$moment=="start", !names(km.res)%in%c("time","moment")] # getting the centroids
+transData <- data.frame("handX" = 0, "handY" = 0, "handZ" = .1)
 # matrix subtraction
 rotData <- rotData.backup - transData[rep(1, nrow(rotData.backup)),]
-indData <- indData.backup - transData[rep(1, nrow(indData.backup)),]
-thuData <- thuData.backup - transData[rep(1, nrow(thuData.backup)),]
 # end coordinates of the whole grasp
-end <- as.numeric(km.res[km.res$moment=="end",1:3] - km.res[km.res$moment=="start",1:3]) # centered end coordinates
+end <- transData
 # rotate trajectories
-indData <- kin.rotate.trajectory(indData, end)
+handData <- kin.rotate.trajectory(handData, end)
 thuData <- kin.rotate.trajectory(thuData, end)
 # polish rotated dataset
 indData <- as.data.frame(indData)

@@ -8,7 +8,7 @@
 #'      y axis: upwards positive, downwards negative
 #'      z axis: forwards positive, backwards negative
 #' @export
-kin.rotate.trajectory <- function(data, end)
+kin.rotate.trajectory <- function(data, end, f = T, t = T, s = T)
 {
   # if data is not a matrix, convert to matrix
   if(!is.matrix(data))
@@ -16,8 +16,17 @@ kin.rotate.trajectory <- function(data, end)
     data = as.matrix(data)
   }
 
+  # list the planes where the rotation will be performed
+  rotationPlanes <- NULL
+  if(f)
+    rotationPlanes <- c(rotationPlanes, "f")
+  if(t)
+    rotationPlanes <- c(rotationPlanes, "t")
+  if(s)
+    rotationPlanes <- c(rotationPlanes, "s")
+
   # three-steps rotation in 3D
-  for(plane in c("f","t","s"))
+  for(plane in rotationPlanes)
   {
     # form the couples relative to each projection plane
     # frontoparallel plane (x,y) | trasversal plane (x,z) | sagittal plane (z,y)
