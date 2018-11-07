@@ -1,6 +1,7 @@
 # kin.signal.analysis
 #' @export
-kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxFrames = 20, deltaTime)
+kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxFrames = 20, deltaTime,
+                                f = T, t = T, s = T)
 {
   # make backup
   signal.backup <- signal
@@ -48,7 +49,7 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
   signalTra <- as.data.frame(signalSG - M) # translate
   names(signalTra) <- paste(signal.name, c("X","Y","Z"), "tra", sep = "")
   # rotate
-  signalRot <- as.data.frame(kin.rotate.trajectory(signalTra, end - start))
+  signalRot <- as.data.frame(kin.rotate.trajectory(signalTra, end - start, f = f, t = t, s = s))
   names(signalRot) <- paste(signal.name, c("X","Y","Z"), "rot", sep = "")
   # vel, acc
   signalVel <- as.data.frame(apply(signalRot, 2, kin.sgFilter, m=1, ts = deltaTime)) # 3D velocities

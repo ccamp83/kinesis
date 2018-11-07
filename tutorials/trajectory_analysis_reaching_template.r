@@ -35,13 +35,15 @@ for(tN in trialsList)
   # prepare signals datasets
   hand.signal <- testTrial[,c("handX","handZ")]
   # analysis: repair, filter, translate, rotate ----
-  handData <- kin.signal.analysis(hand.signal, "hand", start, end, deltaTime = refreshRate)
+  handData <- kin.signal.analysis(hand.signal, "hand", start, end, deltaTime = refreshRate, t = F)
 
   #### merge back ----
   trialData <- cbind(testTrial[c("subjName","trialN","frameN","refreshRate","time")], handData)
 
   head(trialData)
 
+  ggplot(aes(handX, handZ), data = testTrial) +
+    geom_point()
   ggplot(aes(handX, handZ), data = trialData) +
     geom_point()
 
