@@ -18,12 +18,18 @@ timeinfoData <- NULL
 
 #### Analysis loop ####
 trialsList <- unique(testData$trialN)
+badTrials <- NULL
 for(tN in trialsList)
 {
   # tN <- trialsList[1]
   cat("---- trial #", tN, ". ----\n\n", sep = "")
   #### select trial ----
-  testTrial <- subset(testData, trialN == tN)
+  testTrial.backup <- subset(testData, trialN == tN)
+
+  columnsToExclude <- paste0("hand",c("X","Y","Z"),"raw")
+  testTrial <- testTrial.backup[, !names(testTrial.backup)%in%columnsToExclude]
+  testTrial$handXraw <- testTrial$handX
+  testTrial$handZraw <- testTrial$handZ
 
   #### signals analysis ----
   # set start x y z coordinates ----
@@ -33,118 +39,82 @@ for(tN in trialsList)
   # refresh rate ----
   refreshRate <- 1/85
   # prepare signals datasets
-  hand.signal <- testTrial[,c("handX","handZ")]
+  hand.signal <- testTrial[,c("handXraw","handZraw")]
   # analysis: repair, filter, translate, rotate ----
-  handData <- kin.signal.analysis(hand.signal, "hand", start, end, deltaTime = refreshRate, t = F)
+  handData <- kin.signal.analysis(hand.signal, "hand", start, end, deltaTime = refreshRate, f = F)
 
   #### merge back ----
-  trialData <- cbind(testTrial[c("subjName","trialN","frameN","refreshRate","time")], handData)
+  trialData <- cbind(testTrial[c("subjName","trialN","frameN","refreshRate","time","handXraw","handZraw")], handData)
 
-  head(trialData)
+  if(mean(trialData$handVel)>0.001)
+  {
+    #### onset time ----
+    # set velocity threshold ----
+    onsetVel_threshold <- .02
+    # find onset frame ----
+    onsetFramePos <- kin.find.traj.landmark("trialData$handZvel > onsetVel_threshold")
+    # crop trajectory before onset ----
+    trialData <- subset(trialData, frameN >= frameN[onsetFramePos])
 
-  ggplot(aes(handX, handZ), data = testTrial) +
-    geom_point()
-  ggplot(aes(handX, handZ), data = trialData) +
-    geom_point()
+    #### offset time ----
+    # set velocity threshold ----
+    returnVel_threshold <- -.02
+    # find the frame where this happens
+    offsetFramePos <- kin.find.traj.landmark("trialData$handZvel < returnVel_threshold")
+    # crop
+    trialData <- subset(trialData, frameN < frameN[offsetFramePos])
 
-  #### crop the inbound portion of trajectory ----
-  # set velocity threshold ----
-  returnVel_threshold <- -100
-  # crop
-  trialData <- subset(trialData, thumbZvel > returnVel_threshold & indexZvel > returnVel_threshold)
+    # ggplot(aes(frameN, handZ), data = trialData) +
+    #   geom_point()
 
-  #### onset time ----
-  # set velocity threshold ----
-  onsetVel_threshold <- 100
-  # find onset frame ----
-  onsetFrame <- kin.find.onsetTime(trialData$thumbVel, onsetVel_threshold)
-  # crop trajectory before onset ----
-  trialData <- subset(trialData, frameN >= onsetFrame)
+    #### space normalization ----
+    # euclidean distance of hand to its final position
+    trialData$handDist <- sqrt((trialData$handX - tail(trialData$handX, 1))^2 +
+                                (trialData$handY - tail(trialData$handY, 1))^2 +
+                                (trialData$handZ - tail(trialData$handZ, 1))^2
+    )
+    # bin thuDist
+    binN <- 100
+    trialData$handDistB <- with(trialData, cut(handDist, breaks = binN, labels = F))
 
-  #### offset time ----
-  # heuristic based on resultant vector of vel,acc,jerk
-  # calculate jerk
-  trialData$indexJerk <- kin.sgFilter(kin.sgFilter(trialData$indexVel, m = 1, ts = refreshRate), p = 12, ts = refreshRate)
-  trialData$thumbJerk <- kin.sgFilter(kin.sgFilter(trialData$thumbVel, m = 1, ts = refreshRate), p = 12, ts = refreshRate)
-  # resultant vectors
-  trialData$thumbVelAccJerk.res <- with(trialData, sqrt(thumbVel^2 + thumbAcc^2 + thumbJerk^2))
-  trialData$indexVelAccJerk.res <- with(trialData, sqrt(thumbVel^2 + thumbAcc^2 + thumbJerk^2))
-  trialData$index_thumbVelAccJerk.res <- with(trialData, sqrt(thumbVelAccJerk.res^2 + indexVelAccJerk.res^2))
-  # z distance after rotation
-  ztheor <- round(kin.rotate.trajectory(as.data.frame(t(end-start)), end-start), 2)[3]
-  # we look for the offset frame in the second half of the trajectory
-  offsetFrame <- with(subset(trialData, thumbZ > ztheor/2),
-                      frameN[match(kin.min(index_thumbVelAccJerk.res), index_thumbVelAccJerk.res)])
-  # crop trajectory after offset ----
-  trialData <- subset(trialData, frameN <= offsetFrame)
+    #### append trajectory data to main trajectory dataset ----
+    trajData <- rbind(trajData, trialData)
 
-  #### space normalization ----
-  # euclidean distance of thumb to its final position
-  trialData$thuDist <- sqrt((trialData$thumbX - tail(trialData$thumbX, 1))^2 +
-                              (trialData$thumbY - tail(trialData$thumbY, 1))^2 +
-                              (trialData$thumbZ - tail(trialData$thumbZ, 1))^2
-  )
-  # bin thuDist
-  binN <- 100
-  trialData$thuDistB <- with(trialData, cut(thuDist, breaks = binN, labels = F))
+    #### extract parameters ----
+    extractData <- kin.extract.parameters(trialData, c("hand"), grasp = F)
 
-  #### grasp analysis ----
-  graspData <- kin.grasp.analysis(data = trialData, signals = c("index","thumb"), deltaTime = refreshRate)
+    #### append reach parameters to main dataset ----
+    trialParams.r <- extractData$reach_parameters
+    trialParams.r$trialN <- tN
+    reach_paramData <- rbind(reach_paramData, trialParams.r)
 
-  #### merge reaching and grasp analysis ----
-  trialData <- cbind(trialData, graspData)
-
-  #### other specs ----
-  trialData$objectZ <- ifelse(end[3] > -300, 270, 350)
-
-  #### append trajectory data to main trajectory dataset ----
-  trajData <- rbind(trajData, trialData)
-
-  #### extract parameters ----
-  extractData <- kin.extract.parameters(trialData, c("index","thumb"), grasp = T)
-
-  #### append reach parameters to main dataset ----
-  trialParams.r <- extractData$reach_parameters
-  trialParams.r$trialN <- tN
-  reach_paramData <- rbind(reach_paramData, trialParams.r)
-
-  #### append reach parameters to main dataset ----
-  trialParams.g <- extractData$grasp_parameters
-  trialParams.g$trialN <- tN
-  grasp_paramData <- rbind(grasp_paramData, trialParams.g)
-
-  #### append time info to main dataset ----
-  timeinfoParams <- extractData$time_info
-  timeinfoParams$trialN <- tN
-  timeinfoData <- rbind(timeinfoData, timeinfoParams)
+    #### append time info to main dataset ----
+    timeinfoParams <- extractData$time_info
+    timeinfoParams$trialN <- tN
+    timeinfoData <- rbind(timeinfoData, timeinfoParams)
+  } else
+  {
+    badTrials <- c(badTrials, tN)
+  }
 }
 
 head(reach_paramData)
-head(grasp_paramData)
 head(timeinfoData)
+badTrials
 
 #### Results ####
 ggplot(data = trajData) +
-  geom_point(aes(indexX, indexZ), color = "red") +
-  geom_point(aes(thumbX, thumbZ), color = "blue") +
-  facet_grid(. ~ objectZ) +
+  geom_point(aes(handX, handZ)) +
   coord_fixed()
 
 ggplot(data = trajData) +
-  geom_point(aes(-thuDist, indexZ), color = "red") +
-  geom_point(aes(-thuDist, thumbZ), color = "blue") +
-  facet_grid(. ~ objectZ)
+  geom_point(aes(handXraw, handZraw)) +
+  coord_fixed()
+
+ggplot(data = trajData) +
+  geom_point(aes(-handDist, handZ), color = "red")
 
 ggplot(aes(trialN, movTime), data = timeinfoData) + geom_point()
 
 ggplot(aes(trialN, MdeviationX, color = signal), data = reach_paramData) + geom_point() + geom_smooth(method = lm)
 ggplot(aes(trialN, MdeviationY, color = signal), data = reach_paramData) + geom_point() + geom_smooth(method = lm)
-
-ggplot(data=trajData) +
-  geom_point(aes(time, GOF*180/pi, color = objectZ))
-
-ggplot(data=trajData) +
-  geom_point(aes(time, GOT*180/pi, color = objectZ))
-
-ggplot(data=trajData) +
-  geom_point(aes(time, GOS*180/pi, color = objectZ))

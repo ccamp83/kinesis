@@ -8,7 +8,8 @@ start <- c(0,0,0)
 end <- c(0,0,.1)
 deltaTime <- 1/85
 
-kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxFrames = 20, deltaTime)
+kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxFrames = 20, deltaTime,
+                                f = T, t = T, s = T)
 {
   # make backup
   signal.backup <- signal
@@ -31,7 +32,6 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
       }
     }
   }
-  # reorder columns
   # grab the columns with the signal name
   signal.nameCols <- names(signal)[grepl(signal.name, names(signal))]
   # reorder
@@ -43,20 +43,20 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
   signal <- signal[signal.nameCols]
 
   # name of signal
-  names(signal) <- paste0(signal.name, c("X","Y","Z"), "raw")
+  names(signal) <- paste0(signal.name, c("X","Y","Z"), ".raw")
 
   # repair
   signalRep <- as.data.frame(apply(signal, 2, kin.signal.repair, maxFrames = maxFrames))
-  names(signalRep) <- paste(signal.name, c("X","Y","Z"), "rep", sep = "")
+  names(signalRep) <- paste0(signal.name, c("X","Y","Z"), "rep")
   # filter
   signalSG <- as.data.frame(apply(signalRep, 2, kin.sgFilter, ts = deltaTime))
-  names(signalSG) <- paste(signal.name, c("X","Y","Z"), "sg", sep = "")
+  names(signalSG) <- paste0(signal.name, c("X","Y","Z"), "sg")
   # translate
   M <- matrix(rep(start, nrow(signalSG)), ncol = 3, byrow = T) # replicate origin to create a dataset to subtract to the signal
   signalTra <- as.data.frame(signalSG - M) # translate
   names(signalTra) <- paste(signal.name, c("X","Y","Z"), "tra", sep = "")
   # rotate
-  signalRot <- as.data.frame(kin.rotate.trajectory(signalTra, end - start))
+  signalRot <- as.data.frame(kin.rotate.trajectory(signalTra, end - start, f = f, t = t, s = s))
   names(signalRot) <- paste(signal.name, c("X","Y","Z"), "rot", sep = "")
   # vel, acc
   signalVel <- as.data.frame(apply(signalRot, 2, kin.sgFilter, m=1, ts = deltaTime)) # 3D velocities

@@ -1,209 +1,170 @@
 options(scipen = 1, digits = 3)
-
+library(kinesis)
 library(cowplot)
 
 # PROCEDURE FROM GALLIVAN and CHAPMAN 2014
 
 #### Prepare the dataset ####
-# five columns are expected
-get("dataCols", kinesis_parameters)
-# user can set them
+# five columns are expected, by default they are called as follows
+(defaultCols <- get("dataCols", kinesis_parameters))
+# check which default columns are missing
+defaultCols[!defaultCols %in% names(reachData)]
+# if the missing column is present in the dataset but called differently, set it
 kin.setDataCols(deltaTime = "refreshRate")
+# check that the renaming was successful
 get("dataCols", kinesis_parameters)
-# Fix dataset
+# Check dataset
 testData <- data.check(reachData)
 
-#### 1. individual trial analysis ####
-###  1.1 extract ROI ----
-##   1.1.1 fill in missing frames ----
-# inpaint_nans function in matlab
-
-# select one trial with missing frames
+#### select one trial as test ####
 testTrial <- subset(testData, trialN == 50)
-testTrial$handY <- 0
-# testTrial <- subset(testData, trialN == badTrialNum)
+
+# make a backup
+testTrial.backup <- testTrial
+
+#### start location ####
+start <- c(0,0,0)
+
+#### end location ####
+end <- c(0,0,.1)
+
+#### refresh rate ####
+deltaTime <- 1/85
+
+#### signal analysis ####
+
+# create a subset with only the columns that contain signal data
+signalData <- testTrial[, c("handX","handZ")]
+
+# what is the string that all the columns that contain signal data have in common?
+signal.name <- "hand"
+
+# check if there are x y and z columns for the signal
+(signalDataCols <- names(signalData)[grepl(signal.name, names(signalData))])
+# if one column is missing, set it to zero
+if(length(signalDataCols) == 2)
+{
+  # expected columns
+  expectedCols <- paste0(signal.name, c("X","Y","Z"))
+  for(col in expectedCols)
+  {
+    isColFound <- length(names(signalData)[grepl(col, names(signalData))])>0
+    if(!isColFound)
+    {
+      message(paste0("The following column is missing: ", col, ". Will be set to zero.\n"))
+      signalData <- cbind(signalData, 0)
+      names(signalData)[length(names(signalData))] <- col
+    }
+  }
+}
+# grab the columns with the signal name
+signalData.nameCols <- names(signalData)[grepl(signal.name, names(signalData))]
+# reorder
+signalData.nameCols <- sort(signalData.nameCols)
+# all other columns (if any)
+otherCols <- names(signalData)[!grepl(signal.name, names(signalData))]
+
+# retain only testTrial columns
+signalData <- signalData[signalData.nameCols]
+
+# append the suffix .raw to the signal columns
+names(signalData) <- paste0(signal.name, c("X","Y","Z"), ".raw")
+
+#### repair ####
+
 # plot the data
-# ggplot(aes(frameN, handX), data = testTrial) + geom_point() # handX data is good
+(sigAnalysis.g <- ggplot() + geom_point(aes(handX.raw, handZ.raw), data = signalData) + coord_fixed())
 
 # check for missing frames
-testTrial$handXrep <- with(testTrial, kin.signal.repair(handX, maxFrames= 20))
-testTrial$handYrep <- with(testTrial, kin.signal.repair(handY, maxFrames= 20))
-testTrial$handZrep <- with(testTrial, kin.signal.repair(handZ, maxFrames= 20))
+signalRep <- as.data.frame(apply(signalData, 2, kin.signal.repair, maxFrames = maxFrames))
+names(signalRep) <- paste0(signal.name, c("X","Y","Z"), "rep")
 
-##   1.1.2 filter ----
-#    Savitzky-Golay filter ----
-# 3rd order
-testTrial$handXsg <- with(testTrial, kin.sgFilter(handXrep, ts = refreshRate))
-testTrial$handYsg <- with(testTrial, kin.sgFilter(handYrep, ts = refreshRate))
-testTrial$handZsg <- with(testTrial, kin.sgFilter(handZrep, ts = refreshRate))
+#### filter ####
+signalSG <- as.data.frame(apply(signalRep, 2, kin.sgFilter, ts = deltaTime))
+names(signalSG) <- paste0(signal.name, c("X","Y","Z"), "sg")
 
-# ggplot(data = testTrial) +
-#   geom_point(aes(frameN, handXrep), color = "black") +
-#   geom_point(aes(frameN, handXsg), color = "green", alpha=.5)
+# plot the data
+sigAnalysis.g +
+  geom_point(aes(handXrep, handZrep), data = signalRep, color = "red") +
+  geom_point(aes(handXsg, handZsg), data = signalSG, color = "blue")
 
-#    1.2.2.1 apply filter ----
-testTrial$handX <- testTrial$handXsg
-testTrial$handY <- testTrial$handYsg
-testTrial$handZ <- testTrial$handZsg
+# translate
+M <- matrix(rep(start, nrow(signalSG)), ncol = 3, byrow = T) # replicate origin to create a dataset to subtract to the signal
+signalTra <- as.data.frame(signalSG - M) # translate
+names(signalTra) <- paste0(signal.name, c("X","Y","Z"), "tra")
 
-##   1.1.3 translate and rotate to have all trajectories going in the same direction ----
+sigAnalysis.g +
+  geom_point(aes(handXrep, handZrep), data = signalRep, color = "red") +
+  geom_point(aes(handXsg, handZsg), data = signalSG, color = "blue") +
+  geom_point(aes(handXtra, handZtra), data = signalTra, color = "green")
 
-# the trajectory is assumed to start at origin (0,0,0)
-# and terminate at a point (0,0,z)
-# with x axis: rightwards positive, leftwards negative
-#      y axis: upwards positive, downwards negative
-#      z axis: forwards positive, backwards negative
+# rotate
 
-# this requires a translation followed by a rotation
+# the end location AFTER translation is
+newEnd <- end - start
 
-# starting dataset to apply translations and rotations on recursively
-handData.backup <- testTrial[,c("handX","handY","handZ")]
-# if any of the column is missing, it is set to zero
-# dataset containing to-be-rotated fingers positions
-rotData.backup <- handData.backup
+signalRot <- as.data.frame(kin.rotate.trajectory(signalTra, newEnd, f = F, t = T, s = T))
+names(signalRot) <- paste0(signal.name, c("X","Y","Z"), "rot")
 
-# define start and end of movement
-# case unknown
-# rationale: there will be many more samples around start and end of movement
-# because of the low speed of motion
-# hence the distribution of x, y and z positions should be highly bimodal
-# we use cluster analysis to find the centroids of the two clusters (start & end)
-# of each position of each finger
+sigAnalysis.g +
+  geom_point(aes(handXrep, handZrep), data = signalRep, color = "red") +
+  geom_point(aes(handXsg, handZsg), data = signalSG, color = "blue") +
+  geom_point(aes(handXtra, handZtra), data = signalTra, color = "green") +
+  geom_point(aes(handXrot, handZrot), data = signalRot, color = "purple")
 
-# CASE 1: whole grasp
-# translate the trajectory to origin (0,0,0)
-transData <- data.frame("handX" = 0, "handY" = 0, "handZ" = .1)
-# matrix subtraction
-rotData <- rotData.backup - transData[rep(1, nrow(rotData.backup)),]
-# end coordinates of the whole grasp
-end <- transData
-# rotate trajectories
-handData <- kin.rotate.trajectory(handData, end)
-thuData <- kin.rotate.trajectory(thuData, end)
-# polish rotated dataset
-indData <- as.data.frame(indData)
-names(indData) <- c("indexX","indexY","indexZ")
-thuData <- as.data.frame(thuData)
-names(thuData) <- c("thumbX","thumbY","thumbZ")
+# vel, acc
+signalVel <- as.data.frame(apply(signalRot, 2, kin.sgFilter, m=1, ts = deltaTime)) # 3D velocities
+names(signalVel) <- paste0(signal.name, c("X","Y","Z"), "vel")
+signalVel$vel_temp <- kin.sgFilter(sqrt(signalVel[,1]^2 + signalVel[,2]^2 + signalVel[,3]^2), ts = deltaTime)
+signalVel$acc_temp <- kin.sgFilter(kin.sgFilter(signalVel$vel_temp, m = 1, ts = deltaTime), p = 12, ts = deltaTime)
+names(signalVel)[4:5] <- paste(signal.name, c("Vel","Acc"), sep = "")
 
-# plot3d(rotData[c(1,3,2)])
-# points3d(indData[c(1,3,2)], col="red")
-# points3d(thuData[c(1,3,2)], col="blue")
+ggplot(mapping = aes(1:nrow(signalVel), signalVel$handVel)) + geom_point()
+ggplot(mapping = aes(1:nrow(signalVel), signalVel$handZvel)) + geom_point()
+ggplot(mapping = aes(1:nrow(signalVel), signalVel$handAcc)) + geom_point()
 
-# ggplot() +
-#   geom_point(aes(indexX, indexZ), data= rotData) +
-#   geom_point(aes(indexX, indexZ), data= indData, color = "red") +
-#   geom_point(aes(thumbX, thumbZ), data= thuData, color = "blue") +
-#   coord_fixed()
+# merge
+signal <- cbind(signalRot, signalVel)
+names(signal)[1:3] <- paste0(signal.name, c("X","Y","Z"))
 
-# # CASE 2: individual fingers
-# # --- INDEX
-# kmData <- cbind(indData.backup, time = testTrial[,"time"])
-# km.res <- as.data.frame(kmeans(kmData, 2)$centers)
-# km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
-# # translate the trajectory to origin (0,0,0)
-# transData <- km.res[km.res$moment=="start", !names(km.res)%in%c("time","moment")] # getting the centroids
-# # matrix subtraction
-# indData <- indData.backup - transData[rep(1, nrow(indData.backup)),]
-# # end coordinates of the whole grasp
-# end.ind <- as.numeric(km.res[km.res$moment=="end",1:3] - km.res[km.res$moment=="start",1:3]) # centered end coordinates
-# # --- THUMB
-# kmData <- cbind(thuData.backup, time = testTrial[,"time"])
-# km.res <- as.data.frame(kmeans(kmData, 2)$centers)
-# km.res$moment <- with(km.res, ifelse(time == min(time), "start", "end"))
-# # translate the trajectory to origin (0,0,0)
-# transData <- km.res[km.res$moment=="start", !names(km.res)%in%c("time","moment")] # getting the centroids
-# # matrix subtraction
-# thuData <- thuData.backup - transData[rep(1, nrow(thuData.backup)),]
-# # end coordinates of the whole grasp
-# end.thu <- as.numeric(km.res[km.res$moment=="end",1:3] - km.res[km.res$moment=="start",1:3]) # centered end coordinates
-# # rotate trajectories
-# indData.m <- kin.rotate.trajectory(indData, end.ind)
-# thuData.m <- kin.rotate.trajectory(thuData, end.thu)
-# # polish rotated dataset
-# indData <- as.data.frame(indData.m)
-# names(indData) <- c("indexX","indexY","indexZ")
-# thuData <- as.data.frame(thuData.m)
-# names(thuData) <- c("thumbX","thumbY","thumbZ")
+# merge all
+trialData <- cbind(testTrial[c("subjName","trialN","frameN","refreshRate","time")], signal)
 
-# plot3d(rotData[c(1,3,2)])
-# points3d(indData[c(1,3,2)], col="red")
-# points3d(thuData[c(1,3,2)], col="blue")
+#### crop the inbound portion of trajectory ----
+# set velocity threshold ----
+returnVel_threshold <- -.05
+# crop
+trialData <- subset(trialData, handZvel > returnVel_threshold)
 
-# merge rotated data and apply rotation
-names(indData) <- paste(names(indData), "rot", sep="")
-names(thuData) <- paste(names(thuData), "rot", sep="")
-testTrial <- cbind(testTrial, indData, thuData)
+# review data
+ggplot(mapping = aes(frameN, handVel), data = trialData) + geom_point()
+ggplot() + geom_point(aes(handX.raw, handZ.raw), data = signalData) + coord_fixed()
+ggplot() + geom_point(aes(handX, handZ), data = trialData) + coord_fixed()
 
-testTrial$indexX <- testTrial$indexXrot
-testTrial$indexY <- testTrial$indexYrot
-testTrial$indexZ <- testTrial$indexZrot
+#### onset time ----
+# set velocity threshold ----
+onsetVel_threshold <- .02
+# find onset frame ----
+(onsetFramePos <- kin.find.onsetTime(trialData$handVel, onsetVel_threshold))
+# crop trajectory before onset ----
+trialData <- subset(trialData, frameN >= frameN[onsetFramePos])
 
-testTrial$thumbX <- testTrial$thumbXrot
-testTrial$thumbY <- testTrial$thumbYrot
-testTrial$thumbZ <- testTrial$thumbZrot
+# review data
+ggplot(mapping = aes(frameN, handVel), data = trialData) + geom_point()
+ggplot() + geom_point(aes(handX, handZ), data = trialData) + coord_fixed()
 
-##   1.1.4 find movement onset ----
-#    1.1.4.1 calculate velocity vector ----
-# using Savitzy-Golay filter (remember the frame rate!!)
-testTrial$thumbXvel <- with(testTrial, kin.sgFilter(thumbX,m=1, ts = 1/85))
-testTrial$thumbYvel <- with(testTrial, kin.sgFilter(thumbY,m=1, ts = 1/85))
-testTrial$thumbZvel <- with(testTrial, kin.sgFilter(thumbZ,m=1, ts = 1/85))
-testTrial$thumbVel <- with(testTrial, sqrt(thumbXvel^2 + thumbYvel^2 + thumbZvel^2)) # in mm/s
-
-# using Savitzy-Golay filter (remember the frame rate!!)
-testTrial$indexXvel <- with(testTrial, kin.sgFilter(indexX,m=1, ts = 1/85))
-testTrial$indexYvel <- with(testTrial, kin.sgFilter(indexY,m=1, ts = 1/85))
-testTrial$indexZvel <- with(testTrial, kin.sgFilter(indexZ,m=1, ts = 1/85))
-testTrial$indexVel <- with(testTrial, sqrt(indexXvel^2 + indexYvel^2 + indexZvel^2)) # in mm/s
-
-#    1.1.4.2 Savitzky-Golay filter velocitiy, acceleration and jerk vectors ----
-# 3rd order
-# filter velocity
-testTrial$indexVel <- with(testTrial, kin.sgFilter(indexVel, ts = 1/85))
-testTrial$thumbVel <- with(testTrial, kin.sgFilter(thumbVel, ts = 1/85))
-# derive acceleration
-testTrial$indexAcc <- with(testTrial, kin.sgFilter(indexVel, m=1, ts = 1/85))
-testTrial$thumbAcc <- with(testTrial, kin.sgFilter(thumbVel, m=1, ts = 1/85))
-# filter acceleration
-testTrial$indexAcc <- with(testTrial, kin.sgFilter(indexAcc, p = 12, ts = 1/85))
-testTrial$thumbAcc <- with(testTrial, kin.sgFilter(thumbAcc, p = 12, ts = 1/85))
-# derive jerk
-testTrial$indexJerk <- with(testTrial, kin.sgFilter(indexAcc, m=1, ts = 1/85))
-testTrial$thumbJerk <- with(testTrial, kin.sgFilter(thumbAcc, m=1, ts = 1/85))
-# filter jerk
-testTrial$indexJerk <- with(testTrial, kin.sgFilter(indexJerk, p = 12, ts = 1/85))
-testTrial$thumbJerk <- with(testTrial, kin.sgFilter(thumbJerk, p = 12, ts = 1/85))
-
-#    1.1.4.3 find onset time ----
-# crop out the inbound portion of trajectory
-testTrial.backup <- testTrial
-return_threshold <- -100
-testTrial <- subset(testTrial.backup, thumbZvel > return_threshold & indexZvel > return_threshold)
-
-# flag trajectory where z velocity is > threshold
-# incrementally count frames where the condition is met
-# the longest string is the winner, take its fist frame as zero
-onset_threshold <- 100
-onsetFrame <- kin.find.onsetTime(testTrial$thumbVel, onset_threshold)
-# time at movement onset
-testTrial$onsetTime <- testTrial$time[testTrial$frameN == onsetFrame]
-# crop out trajectory before onset
-testTrial <- subset(testTrial, frameN >= onsetFrame)
-
-#    1.1.4.4 find offset time ----
-# in case there is no exact offset time, offset time is defined differently depending on the movement
-# in the case of grasping, it is defined as the time at which velocity, acceleration and jerk of index and thumb reach a minimum
-
+#### offset time ----
 # resultant vectors
-testTrial$thumbVelAccJerk.res <- with(testTrial, sqrt(thumbVel^2 + thumbAcc^2 + thumbJerk^2))
-testTrial$indexVelAccJerk.res <- with(testTrial, sqrt(thumbVel^2 + thumbAcc^2 + thumbJerk^2))
-testTrial$index_thumbVelAccJerk.res <- with(testTrial, sqrt(thumbVelAccJerk.res^2 + indexVelAccJerk.res^2))
+trialData$handVelAcc.res <- with(trialData, sqrt(handVel^2 + handAcc^2))
 # find offest time
-offsetFrame <- with(testTrial, frameN[match(kin.min(index_thumbVelAccJerk.res), index_thumbVelAccJerk.res)])
-testTrial$offsetTime <- testTrial$time[testTrial$frameN == offsetFrame]
+offsetFrame <- with(trialData, frameN[match(kin.min(handVelAcc.res), handVelAcc.res)])
+trialData$offsetTime <- trialData$time[trialData$frameN == offsetFrame]
 # crop out trajectory after offset
-testTrial <- subset(testTrial, frameN <= offsetFrame)
+trialData <- subset(trialData, frameN <= offsetFrame)
+
+# review data
+ggplot(mapping = aes(frameN, handVel), data = trialData) + geom_point()
+ggplot() + geom_point(aes(handX, handZ), data = trialData) + coord_fixed()
 
 #    1.1.4.5 package results ----
 # columns to keep
