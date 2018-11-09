@@ -4,7 +4,7 @@
 \alias{kin.rotate.trajectory}
 \title{Rotate trajectory}
 \usage{
-kin.rotate.trajectory(data, end)
+kin.rotate.trajectory(data, end, f = T, t = T, s = T)
 }
 \arguments{
 \item{data}{a rX3 matrix of x,y,z observations (data.frame format is automatically converted to matrix)}

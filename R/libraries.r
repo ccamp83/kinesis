@@ -26,13 +26,13 @@ libraries <- function(update=F)
   # install missing packages (if existing)
   if(length(toBeInstalled)!=0)
   {
-    install.packages(toBeInstalled)
+    install.packages(toBeInstalled, repos = "https://cloud.r-project.org/")
   }
 
   # update packages if requested by user
   if(update)
   {
-    update.packages()
+    update.packages(repos = "https://cloud.r-project.org/")
   }
 
   # load the required libraries
