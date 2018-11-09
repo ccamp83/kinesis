@@ -1,6 +1,6 @@
 options(scipen = 1, digits = 3)
 library(kinesis)
-library(cowplot)
+mu::mu.library("cowplot")
 
 # PROCEDURE FROM GALLIVAN and CHAPMAN 2014
 

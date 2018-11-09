@@ -16,6 +16,21 @@ trajData <- NULL
 reach_paramData <- NULL
 timeinfoData <- NULL
 
+#### signals analysis ----
+signalName <- "hand"
+# set start x y z coordinates ----
+start <- c(0,0,0)
+# set end (depends on trial's conditions) ----
+end <- c(0,0,.1)
+# refresh rate ----
+refreshRate <- 1/85
+# set velocity threshold ----
+onsetVel_threshold <- .02
+onsetComparison <- "trialData$handZvel > onsetVel_threshold"
+# set velocity threshold ----
+returnVel_threshold <- -.02
+offsetComparison <- "trialData$handZvel < returnVel_threshold"
+
 #### Analysis loop ####
 trialsList <- unique(testData$trialN)
 badTrials <- NULL
@@ -31,17 +46,10 @@ for(tN in trialsList)
   testTrial$handXraw <- testTrial$handX
   testTrial$handZraw <- testTrial$handZ
 
-  #### signals analysis ----
-  # set start x y z coordinates ----
-  start <- c(0,0,0)
-  # set end (depends on trial's conditions) ----
-  end <- c(0,0,.1)
-  # refresh rate ----
-  refreshRate <- 1/85
   # prepare signals datasets
   hand.signal <- testTrial[,c("handXraw","handZraw")]
   # analysis: repair, filter, translate, rotate ----
-  handData <- kin.signal.analysis(hand.signal, "hand", start, end, deltaTime = refreshRate, f = F)
+  handData <- kin.signal.analysis(hand.signal, signalName, start, end, deltaTime = refreshRate, f = F)
 
   #### merge back ----
   trialData <- cbind(testTrial[c("subjName","trialN","frameN","refreshRate","time","handXraw","handZraw")], handData)
@@ -49,18 +57,16 @@ for(tN in trialsList)
   if(mean(trialData$handVel)>0.001)
   {
     #### onset time ----
-    # set velocity threshold ----
-    onsetVel_threshold <- .02
+
     # find onset frame ----
-    onsetFramePos <- kin.find.traj.landmark("trialData$handZvel > onsetVel_threshold")
+    onsetFramePos <- kin.find.traj.landmark(onsetComparison)
     # crop trajectory before onset ----
     trialData <- subset(trialData, frameN >= frameN[onsetFramePos])
 
     #### offset time ----
-    # set velocity threshold ----
-    returnVel_threshold <- -.02
+
     # find the frame where this happens
-    offsetFramePos <- kin.find.traj.landmark("trialData$handZvel < returnVel_threshold")
+    offsetFramePos <- kin.find.traj.landmark(offsetComparison)
     # crop
     trialData <- subset(trialData, frameN < frameN[offsetFramePos])
 
