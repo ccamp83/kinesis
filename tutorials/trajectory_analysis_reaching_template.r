@@ -46,56 +46,51 @@ for(tN in trialsList)
   #### merge back ----
   trialData <- cbind(testTrial[c("subjName","trialN","frameN","refreshRate","time","handXraw","handZraw")], handData)
 
-  if(mean(trialData$handVel)>0.001)
-  {
-    #### onset time ----
-    # set velocity threshold ----
-    onsetVel_threshold <- .02
-    # find onset frame ----
-    onsetFramePos <- kin.find.traj.landmark("trialData$handZvel > onsetVel_threshold")
-    # crop trajectory before onset ----
-    trialData <- subset(trialData, frameN >= frameN[onsetFramePos])
+  #### onset time ----
+  # set velocity threshold ----
+  onsetVel_threshold <- .02
+  # find onset frame ----
+  onsetFramePos <- kin.find.traj.landmark("trialData$handZvel > onsetVel_threshold")
+  # crop trajectory before onset ----
+  trialData <- subset(trialData, frameN >= frameN[onsetFramePos])
 
-    #### offset time ----
-    # set velocity threshold ----
-    returnVel_threshold <- -.02
-    # find the frame where this happens
-    offsetFramePos <- kin.find.traj.landmark("trialData$handZvel < returnVel_threshold")
-    # crop
-    trialData <- subset(trialData, frameN < frameN[offsetFramePos])
+  #### offset time ----
+  # set velocity threshold ----
+  returnVel_threshold <- -.02
+  # find the frame where this happens
+  offsetFramePos <- kin.find.traj.landmark("trialData$handZvel < returnVel_threshold")
+  # crop
+  trialData <- subset(trialData, frameN < frameN[offsetFramePos])
 
-    # ggplot(aes(frameN, handZ), data = trialData) +
-    #   geom_point()
+  # ggplot(aes(frameN, handZ), data = trialData) +
+  #   geom_point()
 
-    #### space normalization ----
-    # euclidean distance of hand to its final position
-    trialData$handDist <- sqrt((trialData$handX - tail(trialData$handX, 1))^2 +
-                                (trialData$handY - tail(trialData$handY, 1))^2 +
-                                (trialData$handZ - tail(trialData$handZ, 1))^2
-    )
-    # bin thuDist
-    binN <- 100
-    trialData$handDistB <- with(trialData, cut(handDist, breaks = binN, labels = F))
+  #### space normalization ----
+  # euclidean distance of hand to its final position
+  trialData$handDist <- sqrt((trialData$handX - tail(trialData$handX, 1))^2 +
+                              (trialData$handY - tail(trialData$handY, 1))^2 +
+                              (trialData$handZ - tail(trialData$handZ, 1))^2
+  )
+  # bin thuDist
+  binN <- 100
+  trialData$handDistB <- with(trialData, cut(handDist, breaks = binN, labels = F))
 
-    #### append trajectory data to main trajectory dataset ----
-    trajData <- rbind(trajData, trialData)
+  #### append trajectory data to main trajectory dataset ----
+  trajData <- rbind(trajData, trialData)
 
-    #### extract parameters ----
-    extractData <- kin.extract.parameters(trialData, c("hand"), grasp = F)
+  #### extract parameters ----
+  extractData <- kin.extract.parameters(trialData, c("hand"), grasp = F)
 
-    #### append reach parameters to main dataset ----
-    trialParams.r <- extractData$reach_parameters
-    trialParams.r$trialN <- tN
-    reach_paramData <- rbind(reach_paramData, trialParams.r)
+  #### append reach parameters to main dataset ----
+  trialParams.r <- extractData$reach_parameters
+  trialParams.r$trialN <- tN
+  reach_paramData <- rbind(reach_paramData, trialParams.r)
 
-    #### append time info to main dataset ----
-    timeinfoParams <- extractData$time_info
-    timeinfoParams$trialN <- tN
-    timeinfoData <- rbind(timeinfoData, timeinfoParams)
-  } else
-  {
-    badTrials <- c(badTrials, tN)
-  }
+  #### append time info to main dataset ----
+  timeinfoParams <- extractData$time_info
+  timeinfoParams$trialN <- tN
+  timeinfoData <- rbind(timeinfoData, timeinfoParams)
+
 }
 
 head(reach_paramData)
