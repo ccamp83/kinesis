@@ -22,6 +22,7 @@ kin.find.traj.landmark <- function(condition)
 
       return(onsetFrame)
     },
-    error = function(e) return(NA)
+    error = function(e) return(NA),
+    warning = function(w) return(NA)
   )
 }
