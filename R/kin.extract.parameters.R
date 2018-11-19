@@ -50,7 +50,8 @@ kin.extract.parameters <- function(data, signals, grasp = F)
             # ---- spatial reach kinematics
             pathLength = max(kin.signal.arclength(temp[paste0(s, c("X","Y","Z"))])),
             MdeviationX = max(temp$X),
-            MdeviationY = max(temp$Y)
+            MdeviationY = max(temp$Y),
+            MdeviationZ = max(temp$Z)
           )
 
           , list(time = as.name(kinesis_parameters$dataCols[3]),
@@ -121,7 +122,8 @@ kin.extract.parameters <- function(data, signals, grasp = F)
               # ---- spatial reach kinematics
               pathLength = max(kin.signal.arclength(temp[c("GPX","GPY","GPZ")])),
               MdeviationX = max(temp$X),
-              MdeviationY = max(temp$Y)
+              MdeviationY = max(temp$Y),
+              MdeviationZ = max(temp$Z)
             )
 
             , list(time = as.name(kinesis_parameters$dataCols[3]),
