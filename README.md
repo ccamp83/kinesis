@@ -4,3 +4,4 @@ This package provides a set of functions to preprocess 3D human kinematic data, 
 knitr::opts_chunk$set(fig.width = 8, collapse = TRUE)
 ```
 
+[test link](/tutorials/test.md)
