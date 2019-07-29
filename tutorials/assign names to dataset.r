@@ -1,5 +1,7 @@
 data("rtgData")
 
+head(rtgData)
+
 # required columns
 reqColumns <- c("trialN",
                 paste("signal",c("X","Y","Z"),"raw", sep = ""))
@@ -9,6 +11,8 @@ optColumns <- c("deltaTime","frameN","time")
 rtgData2 <-
 eval(substitute(
   ddply(rtgData, .(trialCol), summarise,
-        max(thumbXraw)),
+        testVar = max(thumbXraw)),
   list(trialCol = as.name(reqColumns[1]))
 ))
+
+head(rtgData2)
