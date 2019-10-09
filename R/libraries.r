@@ -8,6 +8,7 @@ libraries <- function(update=F)
 
   # list of the required packages
   reqPackages <- c(
+    "lattice",
     "Hmisc",
     "plyr",         # arrange dataset
     "ggplot2",      # generate plots

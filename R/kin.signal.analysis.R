@@ -1,10 +1,21 @@
 # kin.signal.analysis
 #' @export
 kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxFrames = 20, deltaTime,
-                                rotate = T, f = T, t = T, s = T)
+                                 rotate = T, f = T, t = T, s = T)
 {
   tryCatch(
     {
+      # check that time is present
+      hasTimeCol <- "time" %in% names(signal)
+      if(!hasTimeCol)
+      {
+        message("Time column not present.\n")
+        stop()
+      } else
+      {
+        timeCol <- signal$time
+      }
+
       # make backup
       signal.backup <- signal
 
@@ -31,6 +42,7 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
       signal.nameCols <- names(signal)[grepl(signal.name, names(signal))]
       # reorder
       signal.nameCols <- sort(signal.nameCols)
+
       # all other columns
       otherCols <- names(signal)[!grepl(signal.name, names(signal))]
 
@@ -44,11 +56,11 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
       signalRep <- as.data.frame(apply(signal, 2, kin.signal.repair, maxFrames = maxFrames))
       names(signalRep) <- paste(signal.name, c("X","Y","Z"), "rep", sep = "")
       # filter
-      signalSG <- as.data.frame(apply(signalRep, 2, kin.sgFilter, ts = deltaTime))
-      names(signalSG) <- paste(signal.name, c("X","Y","Z"), "sg", sep = "")
+      signalSS <- as.data.frame(apply(signalRep, 2, kin.ssFilter, x = timeCol))
+      names(signalSS) <- paste(signal.name, c("X","Y","Z"), "ss", sep = "")
       # translate
-      M <- matrix(rep(start, nrow(signalSG)), ncol = 3, byrow = T) # replicate origin to create a dataset to subtract to the signal
-      signalTra <- as.data.frame(signalSG - M) # translate
+      M <- matrix(rep(start, nrow(signalSS)), ncol = 3, byrow = T) # replicate origin to create a dataset to subtract to the signal
+      signalTra <- as.data.frame(signalSS - M) # translate
       names(signalTra) <- paste(signal.name, c("X","Y","Z"), "tra", sep = "")
       # rotate
       if(rotate)
@@ -58,13 +70,14 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
       } else
         signalRot <- signalTra
       # vel, acc
-      signalVel <- as.data.frame(apply(signalRot, 2, kin.sgFilter, m=1, ts = deltaTime)) # 3D velocities
+      signalVel <- as.data.frame(apply(signalRot, 2, kin.ssFilter, x = timeCol-min(timeCol), deriv = 1)) # 3D velocities
       names(signalVel) <- paste(signal.name, c("X","Y","Z"), "vel", sep = "")
-      signalVel$vel_temp <- kin.sgFilter(sqrt(signalVel[,1]^2 + signalVel[,2]^2 + signalVel[,3]^2), ts = deltaTime)
-      signalVel$acc_temp <- kin.sgFilter(kin.sgFilter(signalVel$vel_temp, m = 1, ts = deltaTime), p = 12, ts = deltaTime)
-      names(signalVel)[4:5] <- paste(signal.name, c("Vel","Acc"), sep = "")
+      signalVel$vel_temp <- sqrt(signalVel[,1]^2 + signalVel[,2]^2 + signalVel[,3]^2)
+      signalVel$acc_temp <- kin.ssFilter(timeCol, signalVel$vel_temp, deriv = 1, spar = 0)
+      names(signalVel0)[4:5] <- names(signalVel)[4:5] <- paste(signal.name, c("Vel","Acc"), sep = "")
+
       # merge
-      signal <- cbind(signalRot, signalVel)
+      signal <- cbind(signalRot, signalVel, time = timeCol)
       names(signal)[1:3] <- paste0(signal.name, c("X","Y","Z"))
 
       return(signal)
