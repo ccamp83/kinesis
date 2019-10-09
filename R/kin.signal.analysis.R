@@ -1,7 +1,7 @@
 # kin.signal.analysis
 #' @export
-kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxFrames = 20, deltaTime,
-                                 rotate = T, f = T, t = T, s = T)
+kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxFrames = 20,
+                                rotate = T, f = T, t = T, s = T)
 {
   tryCatch(
     {
@@ -70,11 +70,11 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
       } else
         signalRot <- signalTra
       # vel, acc
-      signalVel <- as.data.frame(apply(signalRot, 2, kin.ssFilter, x = timeCol-min(timeCol), deriv = 1)) # 3D velocities
+      signalVel <- as.data.frame(apply(signalRot, 2, kin.ssFilter, x = timeCol, deriv = 1)) # 3D velocities
       names(signalVel) <- paste(signal.name, c("X","Y","Z"), "vel", sep = "")
       signalVel$vel_temp <- sqrt(signalVel[,1]^2 + signalVel[,2]^2 + signalVel[,3]^2)
       signalVel$acc_temp <- kin.ssFilter(timeCol, signalVel$vel_temp, deriv = 1, spar = 0)
-      names(signalVel0)[4:5] <- names(signalVel)[4:5] <- paste(signal.name, c("Vel","Acc"), sep = "")
+      names(signalVel)[4:5] <- paste(signal.name, c("Vel","Acc"), sep = "")
 
       # merge
       signal <- cbind(signalRot, signalVel, time = timeCol)
