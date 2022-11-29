@@ -1,7 +1,7 @@
 Package: kinesis
 Type: Package
 Title: R package for the analysis of motion trajectories and movement kinematics
-Version: 4.0
+Version: 4.1
 Author: Carlo Campagnoli
 Maintainer: Carlo Campagnoli <c.campagnoli@leeds.ac.uk>
 Description: R package for the analysis of motion trajectories and movement kinematics
