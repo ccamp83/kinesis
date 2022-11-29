@@ -3,7 +3,8 @@ kin.extract.parameters <- function(data, signals, grasp = F)
 {
   tryCatch(
     {
-      signalsCols <- paste0(signals, rep(c("X","Y","Z","Vel","Acc"), length(signals)))
+      signalsCols <- c(paste0(signals, rep(c("X","Y","Z","Vel","Acc"), length(signals))),
+                       paste0(signals, rep(paste0(c("X","Y","Z"), "vel"), length(signals))))
       temp <- data[c(kinesis_parameters$dataCols[3],signalsCols)]
 
       time_info <- eval(substitute(
@@ -33,6 +34,10 @@ kin.extract.parameters <- function(data, signals, grasp = F)
             FZ = temp$Z[temp$time == time_info$offset],
 
             # ---- final dynamics
+            FXVel = temp$XVel[temp$time == time_info$offset],
+            FYVel = temp$YVel[temp$time == time_info$offset],
+            FZVel = temp$ZVel[temp$time == time_info$offset],
+
             FVel = temp$Vel[temp$time == time_info$offset],
             FAcc = temp$Acc[temp$time == time_info$offset],
 
@@ -63,7 +68,10 @@ kin.extract.parameters <- function(data, signals, grasp = F)
                  Vel = as.name(paste0(s, "Vel")),
                  X = as.name(paste0(s, "X")),
                  Y = as.name(paste0(s, "Y")),
-                 Z = as.name(paste0(s, "Z"))
+                 Z = as.name(paste0(s, "Z")),
+                 XVel = as.name(paste0(s, "Xvel")),
+                 YVel = as.name(paste0(s, "Yvel")),
+                 ZVel = as.name(paste0(s, "Zvel"))
                  )
         ))
 
@@ -162,6 +170,9 @@ kin.extract.parameters <- function(data, signals, grasp = F)
 
       return(output)
     },
-    error = function(e) return(NA)
+    error = function(e) {
+      message(paste("Error:", e))
+      return(NA)
+    }
   )
 }

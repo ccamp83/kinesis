@@ -6,14 +6,15 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
   tryCatch(
     {
       # check that time is present
-      hasTimeCol <- "time" %in% names(signal)
+      timeColName <- kinesis_parameters$dataCols[3]
+      hasTimeCol <- timeColName %in% names(signal)
       if(!hasTimeCol)
       {
         message("Time column not present.\n")
         stop()
       } else
       {
-        timeCol <- signal$time
+        timeCol <- signal[,timeColName]
       }
 
       # make backup
@@ -82,6 +83,9 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
 
       return(signal)
     },
-    error = function(e) return(NA)
+    error = function(e) {
+      message(paste("Error:", e))
+      return(NA)
+      }
   )
 }
