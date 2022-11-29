@@ -32,6 +32,10 @@ kin.extract.parameters <- function(data, signals, grasp = F)
             FY = temp$Y[temp$time == time_info$offset],
             FZ = temp$Z[temp$time == time_info$offset],
 
+            # ---- final dynamics
+            FVel = temp$Vel[temp$time == time_info$offset],
+            FAcc = temp$Acc[temp$time == time_info$offset],
+
             # ---- reach dynamics
             # maximum acceleration
             MAcc = max(temp$Acc),
