@@ -51,8 +51,10 @@ for(tN in trialsList)
     #### onset time ----
     # set velocity threshold ----
     onsetVel_threshold <- .02
+    onset_condition <- "trialData$handZvel > onsetVel_threshold"
     # find onset frame ----
-    onsetFramePos <- kin.find.traj.landmark("trialData$handZvel > onsetVel_threshold")
+    onsetFramePos <- kin.find.traj.landmark(onset_condition)
+
     if(!is.na(onsetFramePos))
     {
       # crop trajectory before onset ----
@@ -61,8 +63,10 @@ for(tN in trialsList)
       #### offset time ----
       # set velocity threshold ----
       returnVel_threshold <- -.02
+      offset_condition <- "trialData$handZvel < returnVel_threshold"
       # find the frame where this happens
-      offsetFramePos <- kin.find.traj.landmark("trialData$handZvel < returnVel_threshold")
+      offsetFramePos <- kin.find.traj.landmark(offset_condition)
+
       if(!is.na(offsetFramePos))
       {
         # crop
