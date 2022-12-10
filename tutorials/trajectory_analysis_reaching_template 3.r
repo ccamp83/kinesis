@@ -72,7 +72,7 @@ for(tN in trialsList)
         # crop
         trialData <- subset(trialData, frameN < frameN[offsetFramePos])
 
-        # ggplot(aes(frameN, handZ), data = trialData) +
+        # ggplot(aes(time, handZ), data = trialData) +
         #   geom_point()
 
         #### append trajectory data to main trajectory dataset ----
