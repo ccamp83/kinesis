@@ -38,3 +38,9 @@ sortdataframe <- function(x, decreasing=FALSE, by=1, ... ){
 # standard error calculation
 #' @export
 kin.se <- function (x, na.rm = TRUE) {sqrt(var(x, na.rm = na.rm)/length(x[complete.cases(x)]))}
+
+# minima & maxima ----
+# find all local minima  / maxima in a curve
+#' @export
+minima <- function(x) which(x - data.table::shift(x, 1) < 0  & x - data.table::shift(x, 1, type='lead') < 0)
+maxima <- function(x) which(x - data.table::shift(x, 1) > 0  & x - data.table::shift(x, 1, type='lead') > 0)

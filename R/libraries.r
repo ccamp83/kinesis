@@ -14,7 +14,8 @@ libraries <- function(update=F)
     "ggplot2",      # generate plots
     "rgl",          # opengl - ubuntu 14.04 requires "sudo apt-get install libX11-dev freeglut3 freeglut3-dev libxml2-dev" to install this package
     "roxygen2",     # generate package
-    "signal"        # butterworth filter
+    "signal",       # butterworth filter
+    "data.table"    # minima, maxima functions
   )
 
   # check which of the required libraries have to be installed

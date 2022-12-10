@@ -58,9 +58,24 @@ kin.extract.parameters <- function(data, signals, grasp = F)
 
             # ---- spatial reach kinematics
             pathLength = max(kin.signal.arclength(temp[paste0(s, c("X","Y","Z"))])),
-            MdeviationX = max(temp$X),
-            MdeviationY = max(temp$Y),
-            MdeviationZ = max(temp$Z)
+            Xmax = max(temp$X),
+            Ymax = max(temp$Y),
+            Zmax = max(temp$Z),
+
+            # ---- time of spatial reach kinematics
+            timeToXmax = temp$time[which.max(temp$X)],
+            timeToYmax = temp$time[which.max(temp$Y)],
+            timeToZmax = temp$time[which.max(temp$Z)],
+
+            # ---- number of local minima
+            XlocMinN = length(minima(temp$X)),
+            YlocMinN = length(minima(temp$Y)),
+            ZlocMinN = length(minima(temp$Z)),
+
+            # ---- number of local maxima
+            XlocMaxN = length(maxima(temp$X)),
+            YlocMaxN = length(maxima(temp$Y)),
+            ZlocMaxN = length(maxima(temp$Z))
           )
 
           , list(time = as.name(kinesis_parameters$dataCols[3]),
@@ -116,6 +131,14 @@ kin.extract.parameters <- function(data, signals, grasp = F)
               FY = tail(temp$Y, 1),
               FZ = tail(temp$Z, 1),
 
+              # ---- final dynamics
+              FXVel = temp$XVel[temp$time == time_info$offset],
+              FYVel = temp$YVel[temp$time == time_info$offset],
+              FZVel = temp$ZVel[temp$time == time_info$offset],
+
+              FVel = temp$Vel[temp$time == time_info$offset],
+              FAcc = temp$Acc[temp$time == time_info$offset],
+
               # ---- reach dynamics
               # maximum acceleration
               MAcc = max(temp$Acc),
@@ -133,9 +156,24 @@ kin.extract.parameters <- function(data, signals, grasp = F)
 
               # ---- spatial reach kinematics
               pathLength = max(kin.signal.arclength(temp[c("GPX","GPY","GPZ")])),
-              MdeviationX = max(temp$X),
-              MdeviationY = max(temp$Y),
-              MdeviationZ = max(temp$Z)
+              Xmax = max(temp$X),
+              Ymax = max(temp$Y),
+              Zmax = max(temp$Z),
+
+              # ---- time of spatial reach kinematics
+              timeToXmax = temp$time[which.max(temp$X)],
+              timeToYmax = temp$time[which.max(temp$Y)],
+              timeToZmax = temp$time[which.max(temp$Z)],
+
+              # ---- number of local minima
+              XlocMinN = length(minima(temp$X)),
+              YlocMinN = length(minima(temp$Y)),
+              ZlocMinN = length(minima(temp$Z)),
+
+              # ---- number of local maxima
+              XlocMaxN = length(maxima(temp$X)),
+              YlocMaxN = length(maxima(temp$Y)),
+              ZlocMaxN = length(maxima(temp$Z))
             )
 
             , list(time = as.name(kinesis_parameters$dataCols[3]),
@@ -143,7 +181,10 @@ kin.extract.parameters <- function(data, signals, grasp = F)
                    Vel = as.name("GPVel"),
                    X = as.name("GPX"),
                    Y = as.name("GPY"),
-                   Z = as.name("GPZ")
+                   Z = as.name("GPZ"),
+                   XVel = as.name(paste0(s, "Xvel")),
+                   YVel = as.name(paste0(s, "Yvel")),
+                   ZVel = as.name(paste0(s, "Zvel"))
             )
           ))
 
