@@ -139,13 +139,13 @@ clustData <- cbind(
                       # "timeMDecToOffset",
                       # "timeMVelToMDec",
                       # "timeMAccToMVel"
-                      )]
+                    )]
   ,
   timeinfoData[,names(timeinfoData) %in%
                  c("onset",
                    "offset"#,
                    # "movTime"
-                   )]
+                 )]
 )
 head(clustData)
 
@@ -220,7 +220,7 @@ ggplot(aes(timeB, handZ),
        data = subset(trajDataB, trialN == 104)) +
   stat_summary(geom = "point") +
   geom_point()
-  facet_grid(. ~ trialN)
+facet_grid(. ~ trialN)
 
 
 rcorr(subset(trajDataB, cluster == "C1" & trialN == 132)$handZ,
