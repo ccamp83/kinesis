@@ -132,6 +132,10 @@ clustData <- cbind(
                       "MVel","MAcc","MDec",
                       "timeMAcc","timeMVel","timeMDec",
                       "pathLength",
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> c23192c02f2cd6d0ad336162568d2d1397b54d1a
                       "Xmax","timeToXmax",
                       "Zmax","timeToZmax",
                       "XlocMinN","XlocMaxN",
@@ -139,7 +143,14 @@ clustData <- cbind(
                       # "timeMDecToOffset",
                       # "timeMVelToMDec",
                       # "timeMAccToMVel"
+<<<<<<< HEAD
                     )]
+=======
+                      )]
+=======
+                      "Zmax","timeToZmax")]
+>>>>>>> 8247f9d68ecd360118a0ac86a8618a62a5a3cbcc
+>>>>>>> c23192c02f2cd6d0ad336162568d2d1397b54d1a
   ,
   timeinfoData[,names(timeinfoData) %in%
                  c("onset",
@@ -149,6 +160,10 @@ clustData <- cbind(
 )
 head(clustData)
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> c23192c02f2cd6d0ad336162568d2d1397b54d1a
 scale(clustData)
 
 # determining optimal clusters
@@ -157,6 +172,19 @@ optClN <- NbClust(scale(clustData),
                   distance = "euclidean",
                   method = "complete")
 (NC <- max(optClN$Best.partition))
+<<<<<<< HEAD
+=======
+=======
+# determining optimal clusters
+library(NbClust)
+optClN <- NbClust(clustData,
+                  distance = "euclidean",
+                  method = "average",
+                  min.nc=2, max.nc=8)
+(NC <- max(optClN$Best.partition))
+?NbClust
+>>>>>>> 8247f9d68ecd360118a0ac86a8618a62a5a3cbcc
+>>>>>>> c23192c02f2cd6d0ad336162568d2d1397b54d1a
 # number of optimal clusters
 
 # add clusters indexes
@@ -183,7 +211,14 @@ cut(subset(trajData, trialN==0)$time, breaks = 100, labels = F)
 
 # average x, y, z kinematics in each of the 100 time breaks in each trial
 trajDataB <- ddply(trajData, .(trialN, timeB), summarise,
+<<<<<<< HEAD
                    time = mean(time),
+=======
+<<<<<<< HEAD
+                   time = mean(time),
+=======
+>>>>>>> 8247f9d68ecd360118a0ac86a8618a62a5a3cbcc
+>>>>>>> c23192c02f2cd6d0ad336162568d2d1397b54d1a
                    cluster = unique(cluster),
                    handX = mean(handX, na.rm = T),
                    handY = mean(handY, na.rm = T),
@@ -200,6 +235,10 @@ ggplot(aes(timeB, handZ), data = trajDataB) +
   stat_summary(geom = "point") +
   facet_grid(. ~ cluster)
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> c23192c02f2cd6d0ad336162568d2d1397b54d1a
 ddply(trajData, .(cluster), summarise,
       N = lengthunique(trialN))
 
@@ -220,12 +259,52 @@ ggplot(aes(timeB, handZ),
        data = subset(trajDataB, trialN == 104)) +
   stat_summary(geom = "point") +
   geom_point()
+<<<<<<< HEAD
 facet_grid(. ~ trialN)
+=======
+  facet_grid(. ~ trialN)
+>>>>>>> c23192c02f2cd6d0ad336162568d2d1397b54d1a
 
 
 rcorr(subset(trajDataB, cluster == "C1" & trialN == 132)$handZ,
       subset(trajDataB, cluster == "C1" & trialN == 351)$handZ)
 
+<<<<<<< HEAD
+=======
+=======
+lengthunique(subset(trajDataB, cluster == "C3")$trialN)
+head(trajDataB)
+
+ggplot(aes(timeB, handZ),
+       data = subset(trajDataB, cluster == "C3" & trialN < 60)) +
+  stat_summary(geom = "point") +
+  facet_grid(. ~ trialN)
+
+
+# probability data
+probData <- ddply(exp1Data, .(subjName, trajectoryID), summarise,
+                  responseN = mean(responseN),
+                  trajectoryIDF = factor(paste0("T", unique(trajectoryID))),
+                  RT = mean(RT))
+
+# only to get the wide version of the dataset
+res <- ANOVA(probData,
+             "responseN",
+             subjName ~ trajectoryIDF)
+
+edaData <- res$wdata
+clustData <- edaData[,-1]
+
+# determining optimal clusters
+library(NbClust)
+optClN <- NbClust(clustData,
+                  distance = "euclidean",
+                  method = "complete",
+                  min.nc=2, max.nc=8)
+(NC <- max(optClN$Best.partition))
+# number of optimal clusters
+>>>>>>> 8247f9d68ecd360118a0ac86a8618a62a5a3cbcc
+>>>>>>> c23192c02f2cd6d0ad336162568d2d1397b54d1a
 
 # add clusters indexes
 edaData$cluster <- factor(paste0("C", optClN$Best.partition))
@@ -260,6 +339,10 @@ summary(s3.4clusters)
 plot(s3.4clusters)
 
 s3$cluster[1:10,]
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> c23192c02f2cd6d0ad336162568d2d1397b54d1a
 
 
 mu::mu.library("clustering.sc.dp")
@@ -273,3 +356,8 @@ k<-5
 result<-clustering.sc.dp(x,k)
 plot(x, type = 'b', col = result$cluster)
 points(result$centers, pch = 24, bg = (1:k))
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 8247f9d68ecd360118a0ac86a8618a62a5a3cbcc
+>>>>>>> c23192c02f2cd6d0ad336162568d2d1397b54d1a
