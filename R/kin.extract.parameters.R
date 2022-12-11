@@ -65,6 +65,7 @@ kin.extract.parameters <- function(data, signals, grasp = F)
             # ---- time of spatial reach kinematics
             timeToXmax = temp$time[which.max(temp$X)],
             timeToYmax = temp$time[which.max(temp$Y)],
+<<<<<<< HEAD
             timeToZmax = temp$time[which.max(temp$Z)],
 
             # ---- number of local minima
@@ -76,6 +77,9 @@ kin.extract.parameters <- function(data, signals, grasp = F)
             XlocMaxN = length(maxima(temp$X)),
             YlocMaxN = length(maxima(temp$Y)),
             ZlocMaxN = length(maxima(temp$Z))
+=======
+            timeToZmax = temp$time[which.max(temp$Z)]
+>>>>>>> 8247f9d68ecd360118a0ac86a8618a62a5a3cbcc
           )
 
           , list(time = as.name(kinesis_parameters$dataCols[3]),
@@ -163,6 +167,7 @@ kin.extract.parameters <- function(data, signals, grasp = F)
               # ---- time of spatial reach kinematics
               timeToXmax = temp$time[which.max(temp$X)],
               timeToYmax = temp$time[which.max(temp$Y)],
+<<<<<<< HEAD
               timeToZmax = temp$time[which.max(temp$Z)],
 
               # ---- number of local minima
@@ -174,6 +179,9 @@ kin.extract.parameters <- function(data, signals, grasp = F)
               XlocMaxN = length(maxima(temp$X)),
               YlocMaxN = length(maxima(temp$Y)),
               ZlocMaxN = length(maxima(temp$Z))
+=======
+              timeToZmax = temp$time[which.max(temp$Z)]
+>>>>>>> 8247f9d68ecd360118a0ac86a8618a62a5a3cbcc
             )
 
             , list(time = as.name(kinesis_parameters$dataCols[3]),
