@@ -11,5 +11,3 @@ The kinesis package expects a dataset in long format, containing at least the fo
 
 - time: elapsed time (in sec / millisec et cetera) - ie the cumulative sum of deltaTime
 
-## this is a test file
-### nothing else to see here
