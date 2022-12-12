@@ -35,7 +35,7 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
       # make backup
       signal.backup <- signal
 
-      # check what columns match the signal name
+      # check which columns match the signal name
       signalCols <- names(signal)[grepl(signal.name, names(signal))]
       # if one column is missing, set it to zero
       if(length(signalCols) == 2)
