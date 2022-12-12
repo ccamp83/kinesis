@@ -1,6 +1,6 @@
 # kin.bwFilter ----
 #' apply Savitzky-Golay filter
-#' @description This functon is a wrapper for signal::sgolayfilt with a modification to handle NAs
+#' @description This function is a wrapper for signal::sgolayfilt with a modification to handle NAs
 #' @export
 kin.sgFilter <- function(x, p = 4, m = 0, ts = 1)
 {

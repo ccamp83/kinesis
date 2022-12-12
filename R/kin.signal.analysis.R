@@ -1,7 +1,22 @@
-# kin.signal.analysis
+#' @title Analyze trajectory data
+#' @description Repair (check for missing frames), smooth (spline), derive, rotate trajectory data
+#' @param signal dataset to be analyzed. It must contain a time column and three columns for the x, y, z positions of the object (signal) that will be analyzed. See details for the expected names of these columns
+#' @param signal.name character indicating the name of the object (signal)
+#' @param start 3-elements-long vector indicating the x, y, z coordinates of the start position of the trajectory
+#' @param end 3-elements-long vector indicating the x, y, z coordinates of the end position of the trajectory
+#' @param maxFrames integer number of missing frames to be substituted with linear interpolation
+#' @param splinepar parameter for spline smoothing (see ?smooth.spline)
+#' @param rotate logical: should the trajectory be rotated to align to the start-to-end direction?
+#' @param f logical (requires rotate = TRUE): should the trajectory be aligned to the frontoparallel plane?
+#' @param t logical (requires rotate = TRUE): should the trajectory be aligned to the transversal plane?
+#' @param s logical (requires rotate = TRUE): should the trajectory be aligned to the sagittal plane?
+#' @details
+#' The names of the input dataset (signal parameter) must adhere to the following standards:
+#' i) the name of the time column must be identical to what specified through kin.setDataCols()
+#' ii) the other three columns names must be string of the type nameXraw, nameYraw, nameZraw (where "name" must match the signal.name parameter)
 #' @export
-kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxFrames = 20,
-                                rotate = T, f = T, t = T, s = T)
+kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxFrames = 20, splinepar = .5,
+                                rotate = T, f = T, t = T, s = T, ...)
 {
   tryCatch(
     {
@@ -57,7 +72,7 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
       signalRep <- as.data.frame(apply(signal, 2, kin.signal.repair, maxFrames = maxFrames))
       names(signalRep) <- paste(signal.name, c("X","Y","Z"), "rep", sep = "")
       # filter
-      signalSS <- as.data.frame(apply(signalRep, 2, kin.ssFilter, x = timeCol))
+      signalSS <- as.data.frame(apply(signalRep, 2, kin.ssFilter, x = timeCol, spar = splinepar))
       names(signalSS) <- paste(signal.name, c("X","Y","Z"), "ss", sep = "")
       # translate
       M <- matrix(rep(start, nrow(signalSS)), ncol = 3, byrow = T) # replicate origin to create a dataset to subtract to the signal
@@ -71,7 +86,7 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
       } else
         signalRot <- signalTra
       # vel, acc
-      signalVel <- as.data.frame(apply(signalRot, 2, kin.ssFilter, x = timeCol, deriv = 1)) # 3D velocities
+      signalVel <- as.data.frame(apply(signalRot, 2, kin.ssFilter, x = timeCol, spar = splinepar, deriv = 1)) # 3D velocities
       names(signalVel) <- paste(signal.name, c("X","Y","Z"), "vel", sep = "")
       signalVel$vel_temp <- sqrt(signalVel[,1]^2 + signalVel[,2]^2 + signalVel[,3]^2)
       signalVel$acc_temp <- kin.ssFilter(timeCol, signalVel$vel_temp, deriv = 1, spar = 0)
