@@ -6,7 +6,7 @@
 
 .onAttach <- function(libname, pkgname)
 {
-  packageStartupMessage("#### KINESIS v 4.3 - 10 Dec 2022 ####")
+  packageStartupMessage("#### KINESIS v 4.4 - 12 Dec 2022 ####")
 
   kinesis_parameters$dataCols <- c("subjName","frameN", "time","deltaTime","trialN")
 }
