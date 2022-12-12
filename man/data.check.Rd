@@ -4,8 +4,7 @@
 \alias{data.check}
 \title{Check the data file and provide fixes if available}
 \usage{
-data.check(dataset, refreshRate = 85, time.unit = 1, check.only = F,
-  ...)
+data.check(dataset, refreshRate = 85, time.unit = 1, check.only = F, ...)
 }
 \arguments{
 \item{dataset}{an object of the type data.frame}

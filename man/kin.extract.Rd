@@ -4,8 +4,15 @@
 \alias{kin.extract}
 \title{Extract various kinematics from a grasp}
 \usage{
-kin.extract(dataset, MGA.range = NULL, TGA.type = "s", TGA.lim = 20,
-  TGA.kin = "g", graphs = F, ...)
+kin.extract(
+  dataset,
+  MGA.range = NULL,
+  TGA.type = "s",
+  TGA.lim = 20,
+  TGA.kin = "g",
+  graphs = F,
+  ...
+)
 }
 \arguments{
 \item{dataset}{an object of the type data.frame}

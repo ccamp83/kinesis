@@ -4,8 +4,15 @@
 \alias{kin.SmoothAndDerive}
 \title{Smooth and derive kinematics}
 \usage{
-kin.SmoothAndDerive(dataset, lambda = NULL, frames.to.interpolate = 18,
-  index = T, thumb = T, reverse.Zcoords = T, ...)
+kin.SmoothAndDerive(
+  dataset,
+  lambda = NULL,
+  frames.to.interpolate = 18,
+  index = T,
+  thumb = T,
+  reverse.Zcoords = T,
+  ...
+)
 }
 \arguments{
 \item{dataset}{an object of the type data.frame}

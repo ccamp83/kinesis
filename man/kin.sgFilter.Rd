@@ -7,5 +7,5 @@
 kin.sgFilter(x, p = 4, m = 0, ts = 1)
 }
 \description{
-This functon is a wrapper for signal::sgolayfilt with a modification to handle NAs
+This function is a wrapper for signal::sgolayfilt with a modification to handle NAs
 }

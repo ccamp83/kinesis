@@ -4,8 +4,14 @@
 \alias{view.summary.trials}
 \title{view.summary.trials}
 \usage{
-view.summary.trials(trials = NULL, dataset, grid.size = 20,
-  frame = T, print = T, res = 28)
+view.summary.trials(
+  trials = NULL,
+  dataset,
+  grid.size = 20,
+  frame = T,
+  print = T,
+  res = 28
+)
 }
 \description{
 view.summary.trials
