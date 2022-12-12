@@ -1,3 +1,4 @@
+# devtools::install_github("ccamp83/kinesis", force = T)
 library(kinesis)
 mu::mu.library("cowplot")
 options(scipen = 1, digits = 3)
