@@ -11,7 +11,7 @@ kin.bwFilter(s, n = 2, cutoff_freq = 10, type = "low")
 
 \item{n:}{filter order (see ?butter for details)}
 
-\item{W:}{critical frequencies of the filter (see ?butter for details)}
+\item{cutoff_freq:}{critical frequencies of the filter (see ?butter for details)}
 
 \item{type:}{filter type (see ?butter for details)}
 }
