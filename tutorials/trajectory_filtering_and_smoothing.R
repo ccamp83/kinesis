@@ -20,6 +20,20 @@ head(t1)
 ggplot(aes(time, indexZraw), data = t1) +
   geom_point()
 
+# Generate a noisy signal
+x <- sin(seq(0, 10 * pi, length.out = 1000)) +
+     sin(seq(0,  2 * pi, length.out = 1000))
+
+# Filter the noisy signal using a Butterworth filter of order 6 and cutoff frequency 0.1
+filtered_x <- butterworth_filter(x, 4, 0.6)
+filtered_x <- kin.bwFilter(x,
+                           n = 4,
+                           cutoff_freq = 250,
+                           type = "low")
+ggplot() +
+  geom_line(aes(1:1000, x)) +
+  geom_line(aes(1:1000, c(filtered_x)), color = "red")
+
 4/85
 
 t1$indexZBw <- kin.bwFilter(t1$indexZraw,
