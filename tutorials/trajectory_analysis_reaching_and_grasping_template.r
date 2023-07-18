@@ -10,13 +10,12 @@ library(cowplot)
 theme_set(theme_cowplot())
 
 ### FETCH DATA ###
-
-testDataRaw <- read_motive_csv(motiveData)[1:14] # retain first 14 cols which contain hand data
+data(motiveData)
 
 samplingHz <- 120
 
 # rename cols
-names(testDataRaw) <- c(
+names(motiveData) <- c(
   "frameN",
   "time",
   paste0(rep(c("index","knuc","thumb","wrist"), each = 3), c("X","Y","Z"), "raw")
@@ -30,7 +29,7 @@ get("dataCols", kinesis_parameters)
 kin.setDataCols(deltaTime = "refreshRate")
 get("dataCols", kinesis_parameters)
 # Fix dataset
-testData <- data.check(testDataRaw)
+testData <- data.check(motiveData)
 # enter any subjName on the console when prompted
 
 # recap
