@@ -1,4 +1,7 @@
+devtools::install_github("ccamp83/kinesis")
+devtools::install_github("ccamp83/mu")
 library(kinesis)
+library(mu)
 mu::mu.library("cowplot")
 
 # Fix dataset

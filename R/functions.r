@@ -43,4 +43,5 @@ kin.se <- function (x, na.rm = TRUE) {sqrt(var(x, na.rm = na.rm)/length(x[comple
 # find all local minima  / maxima in a curve
 #' @export
 minima <- function(x) which(x - data.table::shift(x, 1) < 0  & x - data.table::shift(x, 1, type='lead') < 0)
+#' @export
 maxima <- function(x) which(x - data.table::shift(x, 1) > 0  & x - data.table::shift(x, 1, type='lead') > 0)

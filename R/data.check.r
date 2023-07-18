@@ -72,6 +72,14 @@ data.check <- function(dataset, refreshRate = 85, time.unit = 1, check.only = F,
         cat(reqCols[3], " added.\n", sep = "")
       }
 
+      # Fix trialN
+      if (reqCols[5] %in% missingCols) {
+        # if trialN is missing, it is assumed that there is one trial
+        dataset$trialN <- 1
+        names(dataset)[names(dataset) == "trialN"] <- reqCols[5]
+        cat(reqCols[5], " added.\n", sep = "")
+      }
+
       # Fix deltaTime
       if (reqCols[4] %in% missingCols) {
         # if time does not exists, create deltaTime
@@ -90,14 +98,6 @@ data.check <- function(dataset, refreshRate = 85, time.unit = 1, check.only = F,
         }
         names(dataset)[names(dataset) == "frameT"] <- reqCols[4]
         cat(reqCols[4], " added.\n", sep = "")
-      }
-
-      # Fix trialN
-      if (reqCols[5] %in% missingCols) {
-        # if trialN is missing, it is assumed that there is one trial
-        dataset$trialN <- 1
-        names(dataset)[names(dataset) == "trialN"] <- reqCols[5]
-        cat(reqCols[5], " added.\n", sep = "")
       }
 
       cat("\nDatabase fixed successfully.")
