@@ -20,7 +20,7 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
 {
   tryCatch(
     {
-      # check that time is present
+      # check that time column is present
       timeColName <- kinesis_parameters$dataCols[3]
       hasTimeCol <- timeColName %in% names(signal)
       if(!hasTimeCol)
