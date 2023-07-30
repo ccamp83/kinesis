@@ -10,11 +10,12 @@ kin.signal.analysis(
   start,
   end,
   maxFrames = 20,
-  splinepar = 0.5,
-  rotate = T,
-  f = T,
-  t = T,
-  s = T,
+  filter = "bw",
+  splinepar = 0.05,
+  bw.cutoff = 10,
+  rotateF = T,
+  rotateT = T,
+  rotateS = T,
   ...
 )
 }
@@ -29,15 +30,17 @@ kin.signal.analysis(
 
 \item{maxFrames}{integer number of missing frames to be substituted with linear interpolation}
 
-\item{splinepar}{parameter for spline smoothing (see ?smooth.spline)}
+\item{filter}{filter used for smoothing: "ss" (smoothing spline), "bw" (low-pass Butterworth - default), "sg" (Savitzky-Golay)}
 
-\item{rotate}{logical: should the trajectory be rotated to align to the start-to-end direction?}
+\item{splinepar}{parameter for smoothing spline (requires filter = "ss". See ?smooth.spline for details)}
 
-\item{f}{logical (requires rotate = TRUE): should the trajectory be aligned to the frontoparallel plane?}
+\item{bw.cutoff}{cutoff frequency for the Butterworth filter (requires filter = "bw". See ?kin.bwFilter)}
 
-\item{t}{logical (requires rotate = TRUE): should the trajectory be aligned to the transversal plane?}
+\item{rotateF}{logical: should the trajectory be aligned to the frontoparallel plane?}
 
-\item{s}{logical (requires rotate = TRUE): should the trajectory be aligned to the sagittal plane?}
+\item{rotateT}{logical: should the trajectory be aligned to the transversal plane?}
+
+\item{rotateS}{logical: should the trajectory be aligned to the sagittal plane?}
 }
 \description{
 Repair (check for missing frames), smooth (spline), derive, rotate trajectory data

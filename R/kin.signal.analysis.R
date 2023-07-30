@@ -8,10 +8,9 @@
 #' @param filter filter used for smoothing: "ss" (smoothing spline), "bw" (low-pass Butterworth - default), "sg" (Savitzky-Golay)
 #' @param splinepar parameter for smoothing spline (requires filter = "ss". See ?smooth.spline for details)
 #' @param bw.cutoff cutoff frequency for the Butterworth filter (requires filter = "bw". See ?kin.bwFilter)
-#' @param rotate logical: should the trajectory be rotated to align to the start-to-end direction?
-#' @param f logical (requires rotate = TRUE): should the trajectory be aligned to the frontoparallel plane?
-#' @param t logical (requires rotate = TRUE): should the trajectory be aligned to the transversal plane?
-#' @param s logical (requires rotate = TRUE): should the trajectory be aligned to the sagittal plane?
+#' @param rotateF logical: should the trajectory be aligned to the frontoparallel plane?
+#' @param rotateT logical: should the trajectory be aligned to the transversal plane?
+#' @param rotateS logical: should the trajectory be aligned to the sagittal plane?
 #' @details
 #' The names of the input dataset (signal parameter) must adhere to the following standards:
 #' i) the name of the time column must be identical to what specified through kin.setDataCols()
@@ -21,7 +20,7 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
                                 filter = "bw",
                                 splinepar = 5e-2,
                                 bw.cutoff = 10,
-                                rotate = T, f = T, t = T, s = T, ...)
+                                rotateF = T, rotateT = T, rotateS = T, ...)
 {
   tryCatch(
     {
@@ -96,12 +95,8 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
       signalTra <- as.data.frame(signalFil - M) # translate
       names(signalTra) <- paste(signal.name, c("X","Y","Z"), "tra", sep = "")
       # rotate
-      if(rotate)
-      {
-        signalRot <- as.data.frame(kin.rotate.trajectory(signalTra, end - start, f = f, t = t, s = s))
-        names(signalRot) <- paste(signal.name, c("X","Y","Z"), "rot", sep = "")
-      } else
-        signalRot <- signalTra
+      signalRot <- as.data.frame(kin.rotate.trajectory(signalTra, end - start, f = rotateF, t = rotateT, s = rotateS))
+      names(signalRot) <- paste(signal.name, c("X","Y","Z"), "rot", sep = "")
       # vel, acc
       signalVel <- as.data.frame(apply(signalRot, 2, kin.ssFilter, x = timeCol, spar = splinepar, deriv = 1)) # 3D velocities
       names(signalVel) <- paste(signal.name, c("X","Y","Z"), "vel", sep = "")
