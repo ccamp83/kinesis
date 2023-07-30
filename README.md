@@ -16,8 +16,15 @@ The kinesis package expects a dataset in long format, containing at minimum the 
 
 - time: elapsed time (in sec / millisec et cetera) - ie the by-trial cumulative sum of deltaTime
 
-
+The names of these five columns can be handled via two functions
 
 ```{r setup, include=FALSE, echo=FALSE}
-ssss
+# retrieve the names of the mandatory five columns expected in the dataset
+kin.getDataCols()
+
+# user can customize their names using kin.setDataCols()
+kin.setDataCols(deltaTime = "refreshRate")
+
+# checking that the column names have been updated
+kin.getDataCols()
 ```
