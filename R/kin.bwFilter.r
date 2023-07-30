@@ -5,7 +5,7 @@
 #' @param  cutoff_freq: critical frequencies of the filter (see ?butter for details)
 #' @param  type: filter type (see ?butter for details)
 #' @export
-kin.bwFilter <- function(s, n = 2, cutoff_freq = 10,type="low"){
+kin.bwFilter <- function(s, n = 2, cutoff_freq = 10, type="low"){
 
   # extend the original vector at the start and at the end
   # to give the filter room to tune in

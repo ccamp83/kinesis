@@ -5,7 +5,9 @@
 #' @param start 3-elements-long vector indicating the x, y, z coordinates of the start position of the trajectory
 #' @param end 3-elements-long vector indicating the x, y, z coordinates of the end position of the trajectory
 #' @param maxFrames integer number of missing frames to be substituted with linear interpolation
-#' @param splinepar parameter for spline smoothing (see ?smooth.spline)
+#' @param filter filter used for smoothing: "ss" (smoothing spline), "bw" (low-pass Butterworth - default), "sg" (Savitzky-Golay)
+#' @param splinepar parameter for smoothing spline (requires filter = "ss". See ?smooth.spline for details)
+#' @param bw.cutoff cutoff frequency for the Butterworth filter (requires filter = "bw". See ?kin.bwFilter)
 #' @param rotate logical: should the trajectory be rotated to align to the start-to-end direction?
 #' @param f logical (requires rotate = TRUE): should the trajectory be aligned to the frontoparallel plane?
 #' @param t logical (requires rotate = TRUE): should the trajectory be aligned to the transversal plane?
@@ -15,7 +17,10 @@
 #' i) the name of the time column must be identical to what specified through kin.setDataCols()
 #' ii) the other three columns names must be string of the type nameXraw, nameYraw, nameZraw (where "name" must match the signal.name parameter)
 #' @export
-kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxFrames = 20, splinepar = .5,
+kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxFrames = 20,
+                                filter = "bw",
+                                splinepar = 5e-2,
+                                bw.cutoff = 10,
                                 rotate = T, f = T, t = T, s = T, ...)
 {
   tryCatch(
@@ -72,11 +77,23 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start, end, maxF
       signalRep <- as.data.frame(apply(signal, 2, kin.signal.repair, maxFrames = maxFrames))
       names(signalRep) <- paste(signal.name, c("X","Y","Z"), "rep", sep = "")
       # filter
-      signalSS <- as.data.frame(apply(signalRep, 2, kin.ssFilter, x = timeCol, spar = splinepar))
-      names(signalSS) <- paste(signal.name, c("X","Y","Z"), "ss", sep = "")
+      signalFil <- NULL
+      if(filter == "ss")
+      {
+        signalFil <- as.data.frame(apply(signalRep, 2, kin.ssFilter, x = timeCol, spar = splinepar))
+        names(signalFil) <- paste(signal.name, c("X","Y","Z"), "ss", sep = "")
+      } else if (filter == "bw")
+      {
+        signalFil <- as.data.frame(apply(signalRep, 2, kin.bwFilter, cutoff_freq = bw.cutoff))
+        names(signalFil) <- paste(signal.name, c("X","Y","Z"), "bw", sep = "")
+      } else if (filter == "sg")
+      {
+        signalFil <- as.data.frame(apply(signalRep, 2, kin.sgFilter, ts = timeCol))
+        names(signalFil) <- paste(signal.name, c("X","Y","Z"), "sg", sep = "")
+      }
       # translate
-      M <- matrix(rep(start, nrow(signalSS)), ncol = 3, byrow = T) # replicate origin to create a dataset to subtract to the signal
-      signalTra <- as.data.frame(signalSS - M) # translate
+      M <- matrix(rep(start, nrow(signalFil)), ncol = 3, byrow = T) # replicate origin to create a dataset to subtract to the signal
+      signalTra <- as.data.frame(signalFil - M) # translate
       names(signalTra) <- paste(signal.name, c("X","Y","Z"), "tra", sep = "")
       # rotate
       if(rotate)
