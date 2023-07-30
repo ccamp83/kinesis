@@ -16,6 +16,8 @@ The kinesis package expects a dataset in long format, containing at minimum the 
 
 - time: elapsed time (in sec / millisec et cetera) - ie the by-trial cumulative sum of deltaTime
 
+
+
 ```{r setup, include=FALSE, echo=FALSE}
 ssss
 ```

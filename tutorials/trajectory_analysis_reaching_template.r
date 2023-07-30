@@ -4,10 +4,10 @@ options(scipen = 1, digits = 3)
 
 #### Prepare the dataset ####
 # five columns are expected
-get("dataCols", kinesis_parameters)
+kin.getDataCols()
 # user can set them
 kin.setDataCols(deltaTime = "refreshRate")
-get("dataCols", kinesis_parameters)
+kin.getDataCols()
 # Fix dataset
 testData <- data.check(reachData)
 
