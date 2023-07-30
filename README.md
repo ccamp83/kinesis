@@ -4,7 +4,7 @@ R package to analyse kinematic trajectories of reaching and grasping movements
 This package provides a set of functions to preprocess 3D human kinematic data, such as motion capture recordings of reaching and grasping movements. The package has been specifically developed using positional data from readouts of an Optotrak Certus and a HTC Vive.  
 
 ## Dataset format
-The kinesis package expects a dataset in long format, containing at least the following five columns: 
+The kinesis package expects a dataset in long format, containing at minimum the following five columns: 
 
 - subjName: participant / agent identifier
 
@@ -14,6 +14,8 @@ The kinesis package expects a dataset in long format, containing at least the fo
 
 - deltaTime: each frame's duration (in sec / millisec et cetera) - ie the refresh rate
 
-- time: elapsed time (in sec / millisec et cetera) - ie the cumulative sum of deltaTime
+- time: elapsed time (in sec / millisec et cetera) - ie the by-trial cumulative sum of deltaTime
 
-
+```{r setup, include=FALSE, echo=FALSE}
+ssss
+```
