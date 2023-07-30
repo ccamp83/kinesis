@@ -18,7 +18,7 @@ The kinesis package expects a dataset in long format, containing at minimum the 
 
 The names of these five columns can be handled via two functions
 
-```{r setup, include=FALSE, echo=T}
+```{r setup, include=T, echo=T}
 # retrieve the names of the mandatory five columns expected in the dataset
 kin.getDataCols()
 
