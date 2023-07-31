@@ -1,15 +1,19 @@
-#### BASIC FIXES TO DATASET ####
+#### DATASET HANDLING AND FIXING ####
 library(kinesis)
 
 ### setting dataset columns ----
 # five columns are expected
-get("dataCols", kinesis_parameters)
+kin.getDataCols()
 # user can set them
-kin.setDataCols(subjName = "subjID", frameN = "frame", time = "t", deltaTime = "refreshTime")
-get("dataCols", kinesis_parameters)
-# they can be reset by calling the setter function empty
+kin.setDataCols(subjName = "subjID",
+                frameN = "frame",
+                time = "t",
+                deltaTime = "refreshTime")
+# checking that they have been updated
+kin.getDataCols()
+# default names can be reset by calling the setter function empty
 kin.setDataCols()
-get("dataCols", kinesis_parameters)
+kin.getDataCols()
 
 ### simple dataset check ----
 data(rtgData_bad) # dataset provided in this package
@@ -39,10 +43,15 @@ head(rtgData) # deltaTime is calculated also in seconds
 # example 1
 data(rtgData) # reload dataset
 rtgData <- rtgData[names(rtgData)!="time"] # remove time
-rtgData <- data.check(rtgData, time.unit = 1)
+rtgData <- data.check(rtgData, time.unit = 1) # by default the function sets a refresh rate of 85 Hz
 head(rtgData) # time and deltaTime are in seconds
 # example 2
 data(rtgData) # reload dataset
 rtgData <- rtgData[names(rtgData)!="time"] # remove time
 rtgData <- data.check(rtgData, time.unit = 1000)
+head(rtgData) # time and deltaTime are in milliseconds
+# example 3
+data(rtgData) # reload dataset
+rtgData <- rtgData[names(rtgData)!="time"] # remove time
+rtgData <- data.check(rtgData, time.unit = 1000, refreshRate = 120) # setting a custom refresh rate of 120 Hz
 head(rtgData) # time and deltaTime are in milliseconds
