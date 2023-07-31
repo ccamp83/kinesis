@@ -52,4 +52,4 @@ The function data.check scans the dataset for the above five columns and can cre
 
 - time is calculated from deltaTime
 
-The following [tutorial](tutorials/fixing_the_dataset.R) illustrates these steps.
+The following [tutorial](tutorials/fixing_the_dataset.R) illustrates these functionalities.
