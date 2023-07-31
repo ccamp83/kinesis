@@ -51,3 +51,5 @@ The function data.check scans the dataset for the above five columns and can cre
 - deltaTime is set to 0.01176471 (85 Hz)
 
 - time is calculated from deltaTime
+
+[tutorial](tutorials/fixing_the_dataset.R)

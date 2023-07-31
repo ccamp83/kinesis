@@ -1,4 +1,5 @@
 #### BASIC FIXES TO DATASET ####
+library(kinesis)
 
 ### setting dataset columns ----
 # five columns are expected
