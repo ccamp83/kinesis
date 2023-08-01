@@ -12,7 +12,7 @@ devtools::install_github("ccamp83/kinesis")
 library(kinesis)
 ```
 
-## Dataset format
+## Preparing the dataset
 The kinesis package expects a dataset in long format, containing at minimum the following five columns: 
 
 - subjName: participant / agent identifier
@@ -52,6 +52,6 @@ The function data.check scans the dataset for the above five columns and can cre
 
 - time is calculated from deltaTime
 
-### Dataset handling and fixing tutorial
+### Dataset prepping tutorial
 
 The following [tutorial](tutorials/fixing_the_dataset.R) illustrates these functionalities.
