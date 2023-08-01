@@ -56,5 +56,28 @@ The function data.check scans the dataset for the above five columns and can cre
 
 The following [tutorial](tutorials/fixing_the_dataset.R) illustrates these functionalities.
 
-## Trajectory data preprocessing and kinematics extraction
+## Trajectory data preprocessing
+
+Preprocessing of trajectory data should be done on a trial-by-trial basis.
+Once the overall dataset has been correctly prepped (as per the above section), data from a single trial should be subset and then analyzed through the following steps:
+
+- set start and end positions of the reach/grasp: this information allows the package to accurately estimate x, y and z deviations of the movement relative to the start-end straight line. Both are specified as 3D vectors (x, y, z coordinates of start position and end position)
+
+```{r}
+start <- c(0,0,.2)     # when at start position, the hand is horizontally aligned with the center of the body (x = 0), resting on the tabletop (y = 0) and 20 cm away from the body (z = .2 - in metres)
+end <- c(0, 0, .4)     # the target is located along the line of sight and resting on the tabletop (x and y = 0) and 40 cm away from the body
+```
+- set refreshRate: this is one over the sampling frequency in Hz (eg. if the sampling frequency is 120 Hz, refreshRate is 1/120). This information is used to accurately derive positional data with respect to time to calculate velocity and acceleration profiles.
+
+- run kin.signal.analysis using the above information. This function performs the following steps in this order: 
+1) Repair (check for missing frames up to a custom threshold and replace with spline prediction) 
+2) Smooth (using one of three possible filters: spline, Butterworth - default, Savitzky-Golay)
+3) Translate (subtract start position from positional data)
+4) Rotate (align the start-end straight line with the line of sight)
+5) Derive - in three steps
+  5a - calculates x, y, z components through derivation (uses spline prediction)
+  5b - calculates velocity resultant through trigonometry
+  5c - calculates acceleration resultant through derivation (uses spline prediction)
+  
+## Kinematic features extraction
 

@@ -1,5 +1,5 @@
 #' @title Analyze trajectory data
-#' @description Repair (check for missing frames), smooth (spline), derive, rotate trajectory data
+#' @description Repair (check for missing frames), smooth, derive, rotate trajectory data
 #' @param signal dataset to be analyzed. It must contain a time column and three columns for the x, y, z positions of the object (signal) that will be analyzed. See details for the expected names of these columns
 #' @param signal.name character indicating the name of the object (signal)
 #' @param start 3-elements-long vector indicating the x, y, z coordinates of the start position of the trajectory. Default to c(0,0,0), no translation is applied.
