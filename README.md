@@ -55,3 +55,6 @@ The function data.check scans the dataset for the above five columns and can cre
 ### Dataset prepping tutorial
 
 The following [tutorial](tutorials/fixing_the_dataset.R) illustrates these functionalities.
+
+## Trajectory data preprocessing and kinematics extraction
+

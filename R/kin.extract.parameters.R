@@ -116,11 +116,10 @@ kin.extract.parameters <- function(data, signals, grasp = F)
       if(grasp)
       {
         #### analysis of grasping
-        names(trialData)
-        temp <- trialData[c(kinesis_parameters$dataCols[3],c("GA",
-                                                             "GPX","GPY","GPZ",
-                                                             "GPXvel","GPYvel","GPZvel",
-                                                             "GPVel","GPAcc"))]
+        temp <- data[c(kinesis_parameters$dataCols[3],c("GA",
+                                                        "GPX","GPY","GPZ",
+                                                        "GPXvel","GPYvel","GPZvel",
+                                                        "GPVel","GPAcc"))]
         output.g <- eval(substitute(
 
           data.frame(

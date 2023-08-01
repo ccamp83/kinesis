@@ -9,18 +9,18 @@ kin.find.traj.landmark <- function(condition)
       # cumulative count of 0s
       x.flag.vel.count <- x.flag.vel * unlist(lapply(rle(x.flag.vel)$lengths, seq_len))
       # gather all missing data in groups
-      onset.check <- data.frame(
+      landmark.check <- data.frame(
         frames = which(eval.cond)
         ,
         count = x.flag.vel.count[x.flag.vel.count!=0]
       )
-      onset.check$group <- with(onset.check, c(0, cumsum(diff(count) != 1)))
+      landmark.check$group <- with(landmark.check, c(0, cumsum(diff(count) != 1)))
       # group with the longest sequence
-      onsetGroup <- subset(onset.check, count == max(onset.check$count))$group
-      # movement onset is the first frame of the group with the longest sequence
-      onsetFrame <- subset(onset.check, group == onsetGroup & count == 1)$frames
+      landmarkGroup <- subset(landmark.check, count == max(landmark.check$count))$group
+      # movement landmark is the first frame of the group with the longest sequence
+      landmarkFrame <- subset(landmark.check, group == landmarkGroup & count == 1)$frames
 
-      return(onsetFrame)
+      return(landmarkFrame)
     },
     error = function(e) return(NA),
     warning = function(w) return(NA)
