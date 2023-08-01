@@ -10,15 +10,15 @@
 #' @export
 kin.rotate.trajectory <- function(data, end, f = T, t = T, s = T)
 {
+  if(is.null(end))
+  {
+    return(data)
+  }
+
   # if data is not a matrix, convert to matrix
   if(!is.matrix(data))
   {
     data = as.matrix(data)
-  }
-
-  if(is.null(end))
-  {
-    f <- t <- s <- F
   }
 
   # list the planes where the rotation will be performed
