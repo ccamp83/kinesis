@@ -16,6 +16,11 @@ kin.rotate.trajectory <- function(data, end, f = T, t = T, s = T)
     data = as.matrix(data)
   }
 
+  if(is.null(end))
+  {
+    f <- t <- s <- F
+  }
+
   # list the planes where the rotation will be performed
   rotationPlanes <- NULL
   if(f)

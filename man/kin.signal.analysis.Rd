@@ -7,8 +7,8 @@
 kin.signal.analysis(
   signal,
   signal.name = "signal",
-  start,
-  end,
+  start = c(0, 0, 0),
+  end = NULL,
   maxFrames = 20,
   filter = "bw",
   splinepar = 0.05,
@@ -24,9 +24,9 @@ kin.signal.analysis(
 
 \item{signal.name}{character indicating the name of the object (signal)}
 
-\item{start}{3-elements-long vector indicating the x, y, z coordinates of the start position of the trajectory}
+\item{start}{3-elements-long vector indicating the x, y, z coordinates of the start position of the trajectory. Default to c(0,0,0)}
 
-\item{end}{3-elements-long vector indicating the x, y, z coordinates of the end position of the trajectory}
+\item{end}{3-elements-long vector indicating the x, y, z coordinates of the end position of the trajectory. If NULL (default), no rotation is applied.}
 
 \item{maxFrames}{integer number of missing frames to be substituted with linear interpolation}
 
