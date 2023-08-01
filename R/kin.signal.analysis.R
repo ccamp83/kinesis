@@ -2,8 +2,8 @@
 #' @description Repair (check for missing frames), smooth (spline), derive, rotate trajectory data
 #' @param signal dataset to be analyzed. It must contain a time column and three columns for the x, y, z positions of the object (signal) that will be analyzed. See details for the expected names of these columns
 #' @param signal.name character indicating the name of the object (signal)
-#' @param start 3-elements-long vector indicating the x, y, z coordinates of the start position of the trajectory. Default to c(0,0,0)
-#' @param end 3-elements-long vector indicating the x, y, z coordinates of the end position of the trajectory. If NULL (default), no rotation is applied.
+#' @param start 3-elements-long vector indicating the x, y, z coordinates of the start position of the trajectory. Default to c(0,0,0), no translation is applied.
+#' @param end 3-elements-long vector indicating the x, y, z coordinates of the end position of the trajectory. Default to c(0,0,0), no rotation is applied.
 #' @param maxFrames integer number of missing frames to be substituted with linear interpolation
 #' @param filter filter used for smoothing: "ss" (smoothing spline), "bw" (low-pass Butterworth - default), "sg" (Savitzky-Golay)
 #' @param splinepar parameter for smoothing spline (requires filter = "ss". See ?smooth.spline for details)
@@ -16,7 +16,7 @@
 #' i) the name of the time column must be identical to what specified through kin.setDataCols()
 #' ii) the other three columns names must be string of the type nameXraw, nameYraw, nameZraw (where "name" must match the signal.name parameter)
 #' @export
-kin.signal.analysis <- function(signal, signal.name = "signal", start = c(0,0,0), end = NULL, maxFrames = 20,
+kin.signal.analysis <- function(signal, signal.name = "signal", start = c(0,0,0), end = c(0,0,0), maxFrames = 20,
                                 filter = "bw",
                                 splinepar = 5e-2,
                                 bw.cutoff = 10,

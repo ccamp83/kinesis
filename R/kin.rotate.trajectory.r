@@ -10,11 +10,6 @@
 #' @export
 kin.rotate.trajectory <- function(data, end, f = T, t = T, s = T)
 {
-  if(is.null(end))
-  {
-    return(data)
-  }
-
   # if data is not a matrix, convert to matrix
   if(!is.matrix(data))
   {
