@@ -119,7 +119,8 @@ kin.extract.parameters <- function(data, signals, grasp = F)
         temp <- data[c(kinesis_parameters$dataCols[3],c("GA",
                                                         "GPX","GPY","GPZ",
                                                         "GPXvel","GPYvel","GPZvel",
-                                                        "GPVel","GPAcc"))]
+                                                        "GPVel","GPAcc",
+                                                        "GOF","GOT","GOS"))]
         output.g <- eval(substitute(
 
           data.frame(
@@ -135,12 +136,17 @@ kin.extract.parameters <- function(data, signals, grasp = F)
             FZ = tail(temp$Z, 1),
 
             # ---- final dynamics
-            FXVel = temp$XVel[temp$time == time_info$offset],
-            FYVel = temp$YVel[temp$time == time_info$offset],
-            FZVel = temp$ZVel[temp$time == time_info$offset],
+            FXVel = tail(temp$XVel, 1),
+            FYVel = tail(temp$YVel, 1),
+            FZVel = tail(temp$ZVel, 1),
 
-            FVel = temp$Vel[temp$time == time_info$offset],
-            FAcc = temp$Acc[temp$time == time_info$offset],
+            FVel = tail(temp$Vel, 1),
+            FAcc = tail(temp$Acc, 1),
+
+            # ---- final grip orientation
+            FGOf = tail(temp$GOF, 1),
+            FGOt = tail(temp$GOT, 1),
+            FGOs = tail(temp$GOS, 1),
 
             # ---- reach dynamics
             # maximum acceleration
