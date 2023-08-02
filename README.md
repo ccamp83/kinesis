@@ -75,9 +75,9 @@ end <- c(0, 0, .4)     # the target is located along the line of sight and resti
 3) Translate (subtract start position from positional data)
 4) Rotate (align the start-end straight line with the line of sight)
 5) Derive - in three steps:
-  5a - calculates x, y, z components through derivation (uses spline prediction)
-  5b - calculates velocity resultant through trigonometry
-  5c - calculates acceleration resultant through derivation (uses spline prediction)
+* calculates x, y, z components through derivation (uses spline prediction)
+* calculates velocity resultant through trigonometry
+* calculates acceleration resultant through derivation (uses spline prediction)
   
 ## Kinematic features extraction
 
