@@ -79,7 +79,7 @@ end <- c(0, 0, .4)     # the target is located along the line of sight and resti
   * calculates velocity resultant through trigonometry
   * calculates acceleration resultant through derivation (uses spline prediction)
 
-- IF ALSO ANALYSING A GRASP: run kin.grasp.analysis. This function takes two markers (index and thumb) and calculates 1) their Euclidean distance in 3D space ("Grip Aperture" or GA); 2) their middle distance in 3D space ("Grip Position" or GP); 3) the orientation of the segment connecting index to thumb in 3D space ("Grip Orientation" or GO). It also derives the GP to calculate its velocity and acceleration components as in point 5 of kin.signal.analysis.
+- run kin.grasp.analysis (if applicable). This function takes two markers (index and thumb) and calculates 1) their Euclidean distance in 3D space ("Grip Aperture" or GA); 2) their middle distance in 3D space ("Grip Position" or GP); 3) the orientation of the segment connecting index to thumb in 3D space ("Grip Orientation" or GO). It also derives the GP to calculate its velocity and acceleration components as in point 5 of kin.signal.analysis.
 
 ## Kinematic features extraction
 
