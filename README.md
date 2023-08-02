@@ -75,9 +75,9 @@ end <- c(0, 0, .4)     # the target is located along the line of sight and resti
 3) Translate (subtract start position from positional data)
 4) Rotate (align the start-end straight line with the line of sight)
 5) Derive - in three steps:
-    i. calculates x, y, z velocity components through derivation (uses spline prediction)
-    ii. calculates velocity resultant through trigonometry
-    iii. calculates acceleration resultant through derivation (uses spline prediction)
+    1. calculates x, y, z velocity components through derivation (uses spline prediction)
+    2. calculates velocity resultant through trigonometry
+    3. calculates acceleration resultant through derivation (uses spline prediction)
 
 - run kin.grasp.analysis (if applicable). This function takes two markers (index and thumb) and calculates 1) their Euclidean distance in 3D space ("Grip Aperture" or GA); 2) their middle distance in 3D space ("Grip Position" or GP); 3) the orientation of the segment connecting index to thumb in 3D space ("Grip Orientation" or GO). It also derives the GP to calculate its velocity and acceleration components as in point 5 of kin.signal.analysis.
 
