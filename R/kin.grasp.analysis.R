@@ -3,14 +3,14 @@ kin.grasp.analysis <- function(data, signals, ...)
 {
   # check that deltaTime column is present
   dTimeColName <- kinesis_parameters$dataCols[4]
-  hasdTimeCol <- dTimeColName %in% names(signal)
+  hasdTimeCol <- dTimeColName %in% names(data)
   if(!hasdTimeCol)
   {
     message("deltaTime column not present.\n")
     stop()
   } else
   {
-    dTimeCol <- signal[,dTimeColName]
+    dTimeCol <- data[,dTimeColName]
   }
 
   signalsCols <- paste0(signals, rep(c("X","Y","Z"), length(signals)))
