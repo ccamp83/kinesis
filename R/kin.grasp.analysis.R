@@ -2,7 +2,7 @@
 kin.grasp.analysis <- function(data, signals, ...)
 {
   # check that deltaTime column is present
-  dTimeColName <- kinesis_parameters$dataCols[4]
+  dTimeColName <- kinesis_parameters$dataCols[3]
   hasdTimeCol <- dTimeColName %in% names(data)
   if(!hasdTimeCol)
   {
