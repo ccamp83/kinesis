@@ -41,7 +41,7 @@ kin.grasp.analysis <- function(data, signals, splinepar = 5e-2, ...)
   GPVel <- as.data.frame(apply(data.frame(GPX, GPY, GPZ), 2, kin.ssFilter, x = timeCol, spar = splinepar, deriv = 1)) # 3D velocities
   names(GPVel) <- paste0(names(GPVel), "vel")
   GPVel$GPVel <- sqrt(GPVel[,1]^2 + GPVel[,2]^2 + GPVel[,3]^2)
-  GPVel$GPAcc <- kin.ssFilter(timeCol, GPVel$vel_temp, deriv = 1, spar = 0)
+  GPVel$GPAcc <- kin.ssFilter(timeCol, GPVel$GPVel, deriv = 1, spar = 0)
 
   # 3D Grip Orientation (raw)
   # GOF is the angle between the parallel projection of GA and the x axis on the Frontal (coronal) plane
@@ -54,5 +54,5 @@ kin.grasp.analysis <- function(data, signals, splinepar = 5e-2, ...)
   GOS <- atan2( (temp[,2]-temp[,5]), (temp[,3]-temp[,6]) )
   GOS[GOS<0] <- GOS[GOS<0]+2*pi
 
-  output <- data.frame(GA, GPX, GPY, GPZ, GPVel, GPAcc, GOF, GOT, GOS)
+  output <- data.frame(GA, GPX, GPY, GPZ, GPVel, GOF, GOT, GOS)
 }
