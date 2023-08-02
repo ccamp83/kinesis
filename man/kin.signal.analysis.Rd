@@ -8,7 +8,7 @@ kin.signal.analysis(
   signal,
   signal.name = "signal",
   start = c(0, 0, 0),
-  end = NULL,
+  end = c(0, 0, 0),
   maxFrames = 20,
   filter = "bw",
   splinepar = 0.05,
@@ -24,9 +24,9 @@ kin.signal.analysis(
 
 \item{signal.name}{character indicating the name of the object (signal)}
 
-\item{start}{3-elements-long vector indicating the x, y, z coordinates of the start position of the trajectory. Default to c(0,0,0)}
+\item{start}{3-elements-long vector indicating the x, y, z coordinates of the start position of the trajectory. Default to c(0,0,0), no translation is applied.}
 
-\item{end}{3-elements-long vector indicating the x, y, z coordinates of the end position of the trajectory. If NULL (default), no rotation is applied.}
+\item{end}{3-elements-long vector indicating the x, y, z coordinates of the end position of the trajectory. Default to c(0,0,0), no rotation is applied.}
 
 \item{maxFrames}{integer number of missing frames to be substituted with linear interpolation}
 
@@ -43,7 +43,7 @@ kin.signal.analysis(
 \item{rotateS}{logical: should the trajectory be aligned to the sagittal plane?}
 }
 \description{
-Repair (check for missing frames), smooth (spline), derive, rotate trajectory data
+Repair (check for missing frames), smooth, derive, rotate trajectory data
 }
 \details{
 The names of the input dataset (signal parameter) must adhere to the following standards:
