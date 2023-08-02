@@ -88,6 +88,6 @@ The procedure for kinematic features extraction follows these steps:
 
 - set a criterion for the movement onset then crop the data prior to that event. This is done by using kin.find.traj.landmark, which identifies the position of the first frame of the longest sequence of consecutive observations adhering to any criterion. For example, if the movement onset criterion is when the wrist velocity becomes greater than 2 cm/s, kin.find.traj.landmark will locate the longest sequence of consecutive frames where that criterion is met (there could be false starts, but the actual movement is usually the longest period of time spent moving) and returns the position of the first frame of that sequence (ie the movement onset time).
 
-- set a criterion for the movement offset then crop the data after to that event. This is done by using kin.find.traj.landmark in the same way as for the movement onset.
+- set a criterion for the movement offset then crop the data after that event. This is done by using kin.find.traj.landmark in the same way as for the movement onset.
 
 - run kin.extract.parameters. This functions returns an array of kinematic features or landmarks for each specified reaching signal (eg, index, thumb, wrist) and grasping signal (GP, GA, GO, if applicable) suitable for statistical analysis, such as MGA, PGVel et cetera (list to follow).
