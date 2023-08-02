@@ -55,4 +55,7 @@ kin.grasp.analysis <- function(data, signals, splinepar = 5e-2, ...)
   GOS[GOS<0] <- GOS[GOS<0]+2*pi
 
   output <- data.frame(timeCol, GA, GPX, GPY, GPZ, GPVel, GOF, GOT, GOS)
+  names(output)[1] <- timeColName
+
+  return(output)
 }
