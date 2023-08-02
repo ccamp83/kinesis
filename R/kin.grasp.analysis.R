@@ -54,5 +54,5 @@ kin.grasp.analysis <- function(data, signals, splinepar = 5e-2, ...)
   GOS <- atan2( (temp[,2]-temp[,5]), (temp[,3]-temp[,6]) )
   GOS[GOS<0] <- GOS[GOS<0]+2*pi
 
-  output <- data.frame(GA, GPX, GPY, GPZ, GPVel, GOF, GOT, GOS)
+  output <- data.frame(timeCol, GA, GPX, GPY, GPZ, GPVel, GOF, GOT, GOS)
 }
