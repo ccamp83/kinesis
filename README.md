@@ -74,10 +74,14 @@ end <- c(0, 0, .4)     # the target is located along the line of sight and resti
 2) Smooth (using one of three possible filters: spline, Butterworth - default, Savitzky-Golay)
 3) Translate (subtract start position from positional data)
 4) Rotate (align the start-end straight line with the line of sight)
-5) Derive - in three steps
+5) Derive - in three steps:
   5a - calculates x, y, z components through derivation (uses spline prediction)
   5b - calculates velocity resultant through trigonometry
   5c - calculates acceleration resultant through derivation (uses spline prediction)
   
 ## Kinematic features extraction
 
+After preprocessing, the kinesis package enables extracting specific features from the kinematics of reaching and grasping data that allow descriptive and inferential statistical analysis of these movements.
+The procedure for features extraction follows these steps:
+
+- 
