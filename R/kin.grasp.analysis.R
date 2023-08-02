@@ -1,6 +1,18 @@
 #' @export
-kin.grasp.analysis <- function(data, signals, deltaTime)
+kin.grasp.analysis <- function(data, signals, ...)
 {
+  # check that deltaTime column is present
+  dTimeColName <- kinesis_parameters$dataCols[4]
+  hasdTimeCol <- dTimeColName %in% names(signal)
+  if(!hasdTimeCol)
+  {
+    message("deltaTime column not present.\n")
+    stop()
+  } else
+  {
+    dTimeCol <- signal[,dTimeColName]
+  }
+
   signalsCols <- paste0(signals, rep(c("X","Y","Z"), length(signals)))
   temp <- data[signalsCols]
 
@@ -26,10 +38,10 @@ kin.grasp.analysis <- function(data, signals, deltaTime)
   GPZ <- (temp[,3] + temp[,6])/2
 
   # Vel, Acc
-  GPVel <- as.data.frame(apply(data.frame(GPX, GPY, GPZ), 2, kin.sgFilter, m=1, ts = deltaTime)) # 3D velocities
+  GPVel <- as.data.frame(apply(data.frame(GPX, GPY, GPZ), 2, kin.sgFilter, m=1, ts = dTimeCol)) # 3D velocities
   names(GPVel) <- paste0(names(GPVel), "vel")
-  GPVel$GPVel <- kin.sgFilter(sqrt(GPVel[,1]^2 + GPVel[,2]^2 + GPVel[,3]^2), ts = deltaTime)
-  GPVel$GPAcc <- kin.sgFilter(kin.sgFilter(GPVel$GPVel, m = 1, ts = deltaTime), ts = deltaTime)
+  GPVel$GPVel <- kin.sgFilter(sqrt(GPVel[,1]^2 + GPVel[,2]^2 + GPVel[,3]^2), ts = dTimeCol)
+  GPVel$GPAcc <- kin.sgFilter(kin.sgFilter(GPVel$GPVel, m = 1, ts = dTimeCol), ts = dTimeCol)
 
   # 3D Grip Orientation (raw)
   # GOF is the angle between the parallel projection of GA and the x axis on the Frontal (coronal) plane
