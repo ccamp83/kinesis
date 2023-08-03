@@ -106,7 +106,7 @@ The procedure for kinematic features extraction follows these steps:
 | MVel (maximum velocity) | FVel (final grip velocity resultant) |
 | MAcc (maximum acceleration) | FAcc (final grip acceleration resultant) |
 | MDec (maximum deceleration) | FGOf (final grip orientation on the frontoparallel plane) |
-| timeMVel (time to MVel) | FGOt (final grip orientation on the transversal plane) |
+| timeMVel (time to MVel) | FGOt (final grip orientation on the transverse plane) |
 | timeMAcc | FGOs (final grip orientation on the sagittal plane) |
 | timeMDec | MVel (maximum grip velocity) |
 | pathLength (total length of the trajectory) | MAcc |
