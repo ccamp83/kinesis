@@ -129,12 +129,12 @@ The procedure for kinematic features extraction follows these steps:
 |  | MGA (maximum grip aperture) |
 |  | timeMGA |
 |  | timeMGAToOffset |
-|  | MGAX (grip X position at MGA time) |
-|  | MGAY (grip Y position at MGA time) |
-|  | MGAZ (grip Z position at MGA time) |
-|  | MGAXvel (grip velocity component in X at MGA time) |
-|  | MGAYvel (grip velocity component in Y at MGA time) |
-|  | MGAZvel (grip velocity component in Z at MGA time) |
+|  | MGAx (grip X position at MGA time) |
+|  | MGAy (grip Y position at MGA time) |
+|  | MGAz (grip Z position at MGA time) |
+|  | MGAxVel (grip velocity component in X at MGA time) |
+|  | MGAyVel (grip velocity component in Y at MGA time) |
+|  | MGAzVel (grip velocity component in Z at MGA time) |
 |  | MGAVel (grip velocity resultant at MGA time) |
 |  | MGAAcc (grip acceleration resultant at MGA time) |
 |  | FGOf (final grip orientation on the frontoparallel plane) |
