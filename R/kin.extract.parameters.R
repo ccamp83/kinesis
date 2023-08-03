@@ -91,16 +91,15 @@ kin.extract.parameters <- function(data, signals, grasp = F)
         ))
 
         # other parameters
-        param.s <- within(param.s,
-                          {
-                            # time from max acceleration to max velocity
-                            timeMAccToMVel = timeMVel - timeMAcc
-                            # time from max velocity to max deceleration
-                            timeMVelToMDec = timeMDec - timeMVel
-                            # time from max deceleration to movement offset
-                            timeMDecToOffset = time_info$offset - timeMDec
-                          })
+        param.s <- param.s %>% mutate(
 
+          # time from max acceleration to max velocity
+          timeMAccToMVel = timeMVel - timeMAcc,
+          # time from max velocity to max deceleration
+          timeMVelToMDec = timeMDec - timeMVel,
+          # time from max deceleration to movement offset
+          timeMDecToOffset = time_info$offset - timeMDec
+          )
 
         param.s$signal <- factor(s)
         param.s <- param.s[c(ncol(param.s), 1:(ncol(param.s)-1))]
@@ -187,28 +186,28 @@ kin.extract.parameters <- function(data, signals, grasp = F)
         ))
 
         # other parameters
-        output.g <- within(output.g,
-                           {
-                             # time from max acceleration to max velocity
-                             timeMAccToMVel = timeMVel - timeMAcc
-                             # time from max velocity to max deceleration
-                             timeMVelToMDec = timeMDec - timeMVel
-                             # time from max deceleration to movement offset
-                             timeMDecToOffset = time_info$offset - timeMDec
+        output.g <- output.g %>% mutate(
 
-                             # ---- final grip aperture
-                             FGA = tail(temp$GA, 1)
-                             # ---- maximum grip aperture
-                             MGA = max(temp$GA)
-                             # time to MGA
-                             timeMGA = temp$time[match(MGA, temp$GA)]
-                             # time from timeMGA to offset
-                             timeMGAToOffset = time_info$offset - timeMGA
-                             # ---- final grip orientation
-                             FGOf = tail(temp$GOF, 1)
-                             FGOt = tail(temp$GOT, 1)
-                             FGOs = tail(temp$GOS, 1)
-                           })
+          # time from max acceleration to max velocity
+          timeMAccToMVel = timeMVel - timeMAcc,
+          # time from max velocity to max deceleration
+          timeMVelToMDec = timeMDec - timeMVel,
+          # time from max deceleration to movement offset
+          timeMDecToOffset = time_info$offset - timeMDec,
+
+          # ---- final grip aperture
+          FGA = tail(temp$GA, 1),
+          # ---- maximum grip aperture
+          MGA = max(temp$GA),
+          # time to MGA
+          timeMGA = temp$time[match(MGA, temp$GA)],
+          # time from timeMGA to offset
+          timeMGAToOffset = time_info$offset - timeMGA,
+          # ---- final grip orientation
+          FGOf = tail(temp$GOF, 1),
+          FGOt = tail(temp$GOT, 1),
+          FGOs = tail(temp$GOS, 1)
+          )
 
         output.g$signal <- factor("grasp")
         output.g <- output.g[c(ncol(output.g), 1:(ncol(output.g)-1))]
