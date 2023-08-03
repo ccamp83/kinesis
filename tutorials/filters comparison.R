@@ -53,7 +53,7 @@ motiveData$indexZ.sg <-
 
 # whole trajectory comparisons
 results.g <- ggplot(motiveData) +
-  geom_line(aes(time_sec, LFinger_position_z), linewidth = 1) +
+  geom_line(aes(time_sec, LFinger_position_z), linewidth = 2) +
   geom_line(aes(time_sec, indexZ.ss), color = "turquoise", linewidth = 1) +
   geom_line(aes(time_sec, indexZ.bw5), color = "red", linewidth = 1) +
   geom_line(aes(time_sec, indexZ.bw10), color = "darkred", linewidth = 1) +
