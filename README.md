@@ -137,7 +137,7 @@ The procedure for kinematic features extraction follows these steps:
 |  | MGAzVel (grip velocity component in Z at MGA time) |
 |  | MGAVel (grip velocity resultant at MGA time) |
 |  | MGAAcc (grip acceleration resultant at MGA time) |
-|  | FGOf (final grip orientation on the frontoparallel plane) |
-|  | FGOt (final grip orientation on the transverse plane) |
-|  | FGOs (final grip orientation on the sagittal plane) |
+|  | FGOf (final grip orientation on the frontoparallel plane, in rad) |
+|  | FGOt (final grip orientation on the transverse plane, in rad) |
+|  | FGOs (final grip orientation on the sagittal plane, in rad) |
 
