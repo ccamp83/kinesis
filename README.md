@@ -72,7 +72,7 @@ end <- c(0, 0, .4)     # the target is located along the line of sight and resti
 - run kin.signal.analysis using the above information. This function performs the following steps in this order: 
 1) Repair (check for missing frames up to a custom threshold and replace with spline prediction) 
 2) Smooth (using one of three possible filters: spline, Butterworth - default, Savitzky-Golay)
-    * this [tutorial](tutorials/filters comparison.R) compares these three filters
+    * this [tutorial](tutorials/filters_comparison.R) compares these three filters
 3) Translate (subtract start position from positional data)
 4) Rotate (align the start-end straight line with the line of sight)
 5) Derive - in three steps:
