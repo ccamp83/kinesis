@@ -124,12 +124,6 @@ kin.extract.parameters <- function(data, signals, grasp = F)
         output.g <- eval(substitute(
 
           data.frame(
-            # ---- final grip aperture
-            FGA = tail(temp$GA, 1),
-
-            # ---- maximum grip aperture
-            MGA = max(temp$GA),
-
             # ---- final 3D position
             FX = tail(temp$X, 1),
             FY = tail(temp$Y, 1),
@@ -142,11 +136,6 @@ kin.extract.parameters <- function(data, signals, grasp = F)
 
             FVel = tail(temp$Vel, 1),
             FAcc = tail(temp$Acc, 1),
-
-            # ---- final grip orientation
-            FGOf = tail(temp$GOF, 1),
-            FGOt = tail(temp$GOT, 1),
-            FGOs = tail(temp$GOS, 1),
 
             # ---- reach dynamics
             # maximum velocity
@@ -207,10 +196,18 @@ kin.extract.parameters <- function(data, signals, grasp = F)
                              # time from max deceleration to movement offset
                              timeMDecToOffset = time_info$offset - timeMDec
 
+                             # ---- final grip aperture
+                             FGA = tail(temp$GA, 1)
+                             # ---- maximum grip aperture
+                             MGA = max(temp$GA)
                              # time to MGA
                              timeMGA = temp$time[match(MGA, temp$GA)]
                              # time from timeMGA to offset
                              timeMGAToOffset = time_info$offset - timeMGA
+                             # ---- final grip orientation
+                             FGOf = tail(temp$GOF, 1)
+                             FGOt = tail(temp$GOT, 1)
+                             FGOs = tail(temp$GOS, 1)
                            })
 
         output.g$signal <- factor("grasp")

@@ -95,41 +95,41 @@ The procedure for kinematic features extraction follows these steps:
 
 | Reaching | Grasping |
 |---|---|
-| FX (final X position) | FGA (final grip aperture) |
-| FY | MGA (maximum grip aperture) |
-| FZ | FX (final grip position in X) |
-| FXVel (final velocity component in X) | FY |
-| FYVel | FZ |
-| FZVel | FXVel (final grip velocity component in X) |
-| FVel (final velocity resultant) | FYVel |
-| FAcc (final acceleration resultant) | FZVel |
-| MVel (maximum velocity) | FVel (final grip velocity resultant) |
-| MAcc (maximum acceleration) | FAcc (final grip acceleration resultant) |
-| MDec (maximum deceleration) | FGOf (final grip orientation on the frontoparallel plane) |
-| timeMVel (time to MVel) | FGOt (final grip orientation on the transverse plane) |
-| timeMAcc | FGOs (final grip orientation on the sagittal plane) |
-| timeMDec | MVel (maximum grip velocity) |
-| pathLength (total length of the trajectory) | MAcc |
-| Xmax (maximum deviation from straight path on X axis) | MDec |
-| Ymax | timeMVel |
-| Zmax | timeMAcc |
-| timeToXmax | timeMDec |
-| timeToYmax | pathLength |
-| timeToZmax | Xmax |
-| XlocMinN (total local minima of the X position. diagnostic, ie how smooth vs jerky in X) | Ymax |
-| YlocMinN | Zmax |
-| ZlocMinN | timeToXmax |
-| XlocMaxN (total local maxima of the X position - as above) | timeToYmax |
-| YlocMaxN | timeToZmax |
-| ZlocMaxN | XlocMinN |
-| timeMAccToMVel (time from max acceleration to max velocity) | YlocMinN |
-| timeMVelToMDec (time from max velocity to max deceleration) | ZlocMinN |
-| timeMDecToOffset (time from max deceleration to movement offset) | XlocMaxN |
-|  | YlocMaxN |
-|  | ZlocMaxN |
-|  | timeMAccToMVel |
-|  | timeMVelToMDec |
-|  | timeMDecToOffset |
+| FX (final X position) | FX (final grip position in X) |
+| FY | FY |
+| FZ | FZ |
+| FXVel (final velocity component in X) | FXVel (final grip velocity component in X) |
+| FYVel | FYVel |
+| FZVel | FZVel |
+| FVel (final velocity resultant) | FVel (final grip velocity resultant) |
+| FAcc (final acceleration resultant) | FAcc (final grip acceleration resultant) |
+| MVel (maximum velocity) | MVel (maximum grip velocity) |
+| MAcc (maximum acceleration) | MAcc |
+| MDec (maximum deceleration) | MDec |
+| timeMVel (time to MVel) | timeMVel |
+| timeMAcc | timeMAcc |
+| timeMDec | timeMDec |
+| pathLength (total length of the trajectory) | pathLength |
+| Xmax (maximum deviation from straight path on X axis) | Xmax |
+| Ymax | Ymax |
+| Zmax | Zmax |
+| timeToXmax | timeToXmax |
+| timeToYmax | timeToYmax |
+| timeToZmax | timeToZmax |
+| XlocMinN (total local minima of the X position. diagnostic, ie how smooth vs jerky in X) | XlocMinN |
+| YlocMinN | YlocMinN |
+| ZlocMinN | ZlocMinN |
+| XlocMaxN (total local maxima of the X position - as above) | XlocMaxN |
+| YlocMaxN | YlocMaxN |
+| ZlocMaxN | ZlocMaxN |
+| timeMAccToMVel (time from max acceleration to max velocity) | timeMAccToMVel |
+| timeMVelToMDec (time from max velocity to max deceleration) | timeMVelToMDec |
+| timeMDecToOffset (time from max deceleration to movement offset) | timeMDecToOffset |
+|  | FGA (final grip aperture) |
+|  | MGA (maximum grip aperture) |
 |  | timeMGA |
 |  | timeMGAToOffset |
+|  | FGOf (final grip orientation on the frontoparallel plane) |
+|  | FGOt (final grip orientation on the transverse plane) |
+|  | FGOs (final grip orientation on the sagittal plane) |
 
