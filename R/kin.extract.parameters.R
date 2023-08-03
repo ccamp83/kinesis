@@ -42,17 +42,17 @@ kin.extract.parameters <- function(data, signals, grasp = F)
             FAcc = temp$Acc[temp$time == time_info$offset],
 
             # ---- reach dynamics
-            # maximum acceleration
-            MAcc = max(temp$Acc),
             # maximum velocity
             MVel = max(temp$Vel),
+            # maximum acceleration
+            MAcc = max(temp$Acc),
             # maximum deceleration
             MDec = min(temp$Acc),
 
-            # time to maximum acceleration
-            timeMAcc = temp$time[which.max(temp$Acc)],
             # time to maximum velocity
             timeMVel = temp$time[which.max(temp$Vel)],
+            # time to maximum acceleration
+            timeMAcc = temp$time[which.max(temp$Acc)],
             # time to maximum deceleration
             timeMDec = temp$time[which.min(temp$Acc)],
 
@@ -149,17 +149,17 @@ kin.extract.parameters <- function(data, signals, grasp = F)
             FGOs = tail(temp$GOS, 1),
 
             # ---- reach dynamics
-            # maximum acceleration
-            MAcc = max(temp$Acc),
             # maximum velocity
             MVel = max(temp$Vel),
+            # maximum acceleration
+            MAcc = max(temp$Acc),
             # maximum deceleration
             MDec = min(temp$Acc),
 
-            # time to maximum acceleration
-            timeMAcc = temp$time[which.max(temp$Acc)],
             # time to maximum velocity
             timeMVel = temp$time[which.max(temp$Vel)],
+            # time to maximum acceleration
+            timeMAcc = temp$time[which.max(temp$Acc)],
             # time to maximum deceleration
             timeMDec = temp$time[which.min(temp$Acc)],
 

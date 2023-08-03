@@ -90,4 +90,45 @@ The procedure for kinematic features extraction follows these steps:
 
 - set a criterion for the movement offset then crop the data after that event. This is done by using kin.find.traj.landmark in the same way as for the movement onset.
 
-- run kin.extract.parameters. This functions returns an array of kinematic features or landmarks for each specified reaching signal (eg, index, thumb, wrist) and grasping signal (GP, GA, GO, if applicable) suitable for statistical analysis, such as MGA, PGVel et cetera (list to follow).
+- run kin.extract.parameters. This functions returns an array of kinematic features or landmarks for each specified reaching signal (eg, index, thumb, wrist) and grasping signal (GP, GA, GO, if applicable) suitable for statistical analysis. The complete list follows here:
+
+| Reaching | Grasping |
+|---|---|
+| FX (final X position) | FGA (final grip aperture) |
+| FY | MGA (maximum grip aperture) |
+| FZ | FX (final grip position in X) |
+| FXVel (final velocity component in X) | FY |
+| FYVel | FZ |
+| FZVel | FXVel (final grip velocity component in X) |
+| FVel (final velocity resultant) | FYVel |
+| FAcc (final acceleration resultant) | FZVel |
+| MVel (maximum velocity) | FVel (final grip velocity resultant) |
+| MAcc (maximum acceleration) | FAcc (final grip acceleration resultant) |
+| MDec (maximum deceleration) | FGOf (final grip orientation on the frontoparallel plane) |
+| timeMVel (time to MVel) | FGOt (final grip orientation on the transversal plane) |
+| timeMAcc | FGOs (final grip orientation on the sagittal plane) |
+| timeMDec | MVel (maximum grip velocity) |
+| pathLength (total length of the trajectory) | MAcc |
+| Xmax (maximum deviation from straight path on X axis) | MDec |
+| Ymax | timeMVel |
+| Zmax | timeMAcc |
+| timeToXmax | timeMDec |
+| timeToYmax | pathLength |
+| timeToZmax | Xmax |
+| XlocMinN (total local minima of the X position. diagnostic, ie how smooth vs jerky in X) | Ymax |
+| YlocMinN | Zmax |
+| ZlocMinN | timeToXmax |
+| XlocMaxN (total local maxima of the X position - as above) | timeToYmax |
+| YlocMaxN | timeToZmax |
+| ZlocMaxN | XlocMinN |
+| timeMAccToMVel (time from max acceleration to max velocity) | YlocMinN |
+| timeMVelToMDec (time from max velocity to max deceleration) | ZlocMinN |
+| timeMDecToOffset (time from max deceleration to movement offset) | XlocMaxN |
+|  | YlocMaxN |
+|  | ZlocMaxN |
+|  | timeMAccToMVel |
+|  | timeMVelToMDec |
+|  | timeMDecToOffset |
+|  | timeMGA |
+|  | timeMGAToOffset |
+
