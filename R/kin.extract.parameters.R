@@ -203,12 +203,6 @@ kin.extract.parameters <- function(data, signals, grasp = F)
           timeMGA = temp$time[match(MGA, temp$GA)],
           # time from timeMGA to offset
           timeMGAToOffset = time_info$offset - timeMGA,
-          MGAx = temp$GPX[match(timeMGA, temp$time)],
-          MGAy = temp$GPY[match(timeMGA, temp$time)],
-          MGAz = temp$GPZ[match(timeMGA, temp$time)],
-          MGAxVel = temp$GPXvel[match(timeMGA, temp$time)],
-          MGAyVel = temp$GPYvel[match(timeMGA, temp$time)],
-          MGAzVel = temp$GPZvel[match(timeMGA, temp$time)],
           MGAVel = temp$GPVel[match(timeMGA, temp$time)],
           MGAAcc = temp$GPAcc[match(timeMGA, temp$time)],
           # ---- final grip orientation
