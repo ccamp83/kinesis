@@ -20,6 +20,9 @@ kin.extract.parameters <- function(data, signals, grasp = F)
       time_info <- within(time_info,
                           {movTime = offset-onset})
 
+      # subtract onset to time column so it starts from zero
+      temp[1] <- temp[1] - time_info$onset
+
       #### analysis of reaching
       output.s <- NULL
       # loop for each signal
@@ -120,6 +123,10 @@ kin.extract.parameters <- function(data, signals, grasp = F)
                                                         "GPXvel","GPYvel","GPZvel",
                                                         "GPVel","GPAcc",
                                                         "GOF","GOT","GOS"))]
+
+        # subtract onset to time column so it starts from zero
+        temp[1] <- temp[1] - time_info$onset
+
         output.g <- eval(substitute(
 
           data.frame(
