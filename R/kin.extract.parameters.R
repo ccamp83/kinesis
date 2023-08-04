@@ -201,9 +201,15 @@ kin.extract.parameters <- function(data, signals, grasp = F)
           MGA = max(temp$GA),
           # time to MGA
           timeMGA = temp$time[match(MGA, temp$GA)],
-          # time from timeMGA to offset
+          # time from MVel to MGA
+          timeMVelToMGA = timeMGA - timeMVel,
+          # time from MGA to MDec
+          timeMGAToMDec = timeMDec - timeMGA,
+          # time from MGA to offset
           timeMGAToOffset = time_info$offset - timeMGA,
+          # maximum velocity at MGA
           MGAVel = temp$GPVel[match(timeMGA, temp$time)],
+          # maximum acceleration at MGA
           MGAAcc = temp$GPAcc[match(timeMGA, temp$time)],
           # ---- final grip orientation
           FGOf = tail(temp$GOF, 1),

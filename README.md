@@ -128,6 +128,8 @@ The procedure for kinematic features extraction follows these steps:
 |  | FGA (final grip aperture) |
 |  | MGA (maximum grip aperture) |
 |  | timeMGA |
+|  | timeMVelToMGA |
+|  | timeMGAToMDec |
 |  | timeMGAToOffset |
 |  | MGAVel (grip velocity resultant at MGA time) |
 |  | MGAAcc (grip acceleration resultant at MGA time) |
