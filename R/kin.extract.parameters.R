@@ -1,11 +1,12 @@
 #' @export
-kin.extract.parameters <- function(data, signals, grasp = F)
+kin.extract.parameters2 <- function(data, signals, grasp = F)
 {
   tryCatch(
     {
       signalsCols <- c(paste0(signals, rep(c("X","Y","Z","Vel","Acc"), length(signals))),
                        paste0(signals, rep(paste0(c("X","Y","Z"), "vel"), length(signals))))
-      temp <- data[c(kinesis_parameters$dataCols[3],signalsCols)]
+      timeColName <- kinesis_parameters$dataCols[3]
+      temp <- data[c(timeColName,signalsCols)]
 
       time_info <- eval(substitute(
 
@@ -14,14 +15,14 @@ kin.extract.parameters <- function(data, signals, grasp = F)
           onset = min(temp$time),
           offset = max(temp$time)
         )
-        , list(time = as.name(kinesis_parameters$dataCols[3]))
+        , list(time = as.name(timeColName))
       ))
 
       time_info <- within(time_info,
                           {movTime = offset-onset})
 
       # subtract onset to time column so it starts from zero
-      temp[1] <- temp[1] - time_info$onset
+      temp[timeColName] <- temp[timeColName] - time_info$onset
 
       #### analysis of reaching
       output.s <- NULL
@@ -32,17 +33,17 @@ kin.extract.parameters <- function(data, signals, grasp = F)
 
           data.frame(
             # ---- final 3D position
-            FX = temp$X[temp$time == time_info$offset],
-            FY = temp$Y[temp$time == time_info$offset],
-            FZ = temp$Z[temp$time == time_info$offset],
+            FX = tail(temp$X, 1),
+            FY = tail(temp$Y, 1),
+            FZ = tail(temp$Z, 1),
 
             # ---- final dynamics
-            FXVel = temp$XVel[temp$time == time_info$offset],
-            FYVel = temp$YVel[temp$time == time_info$offset],
-            FZVel = temp$ZVel[temp$time == time_info$offset],
+            FXVel = tail(temp$XVel, 1),
+            FYVel = tail(temp$YVel, 1),
+            FZVel = tail(temp$ZVel, 1),
 
-            FVel = temp$Vel[temp$time == time_info$offset],
-            FAcc = temp$Acc[temp$time == time_info$offset],
+            FVel = tail(temp$Vel, 1),
+            FAcc = tail(temp$Acc, 1),
 
             # ---- reach dynamics
             # maximum velocity
@@ -81,7 +82,7 @@ kin.extract.parameters <- function(data, signals, grasp = F)
             ZlocMaxN = length(maxima(temp$Z))
           )
 
-          , list(time = as.name(kinesis_parameters$dataCols[3]),
+          , list(time = as.name(timeColName),
                  Acc = as.name(paste0(s, "Acc")),
                  Vel = as.name(paste0(s, "Vel")),
                  X = as.name(paste0(s, "X")),
@@ -118,14 +119,14 @@ kin.extract.parameters <- function(data, signals, grasp = F)
       if(grasp)
       {
         #### analysis of grasping
-        temp <- data[c(kinesis_parameters$dataCols[3],c("GA",
+        temp <- data[c(timeColName,c("GA",
                                                         "GPX","GPY","GPZ",
                                                         "GPXvel","GPYvel","GPZvel",
                                                         "GPVel","GPAcc",
                                                         "GOF","GOT","GOS"))]
 
         # subtract onset to time column so it starts from zero
-        temp[1] <- temp[1] - time_info$onset
+        temp[timeColName] <- temp[timeColName] - time_info$onset
 
         output.g <- eval(substitute(
 
@@ -180,7 +181,7 @@ kin.extract.parameters <- function(data, signals, grasp = F)
             ZlocMaxN = length(maxima(temp$Z))
           )
 
-          , list(time = as.name(kinesis_parameters$dataCols[3]),
+          , list(time = as.name(timeColName),
                  Acc = as.name("GPAcc"),
                  Vel = as.name("GPVel"),
                  X = as.name("GPX"),
