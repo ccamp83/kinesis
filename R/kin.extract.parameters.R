@@ -1,5 +1,5 @@
 #' @export
-kin.extract.parameters2 <- function(data, signals, grasp = F)
+kin.extract.parameters <- function(data, signals, grasp = F)
 {
   tryCatch(
     {
