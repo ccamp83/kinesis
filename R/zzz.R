@@ -6,7 +6,14 @@
 
 .onAttach <- function(libname, pkgname)
 {
-  packageStartupMessage("#### KINESIS v 5.0.1 'Mambo' - 5 Aug 2023 ####")
+  descriptionfile <- system.file("DESCRIPTION", package = "kinesis")
+  descfile <- desc::desc(descriptionfile)
+
+  packageStartupMessage(paste0("#### KINESIS v",
+                               installed.packages()['kinesis','Version'],
+                               " 'Mambo' | ",
+                               descfile$get_field("Date"),
+                               " ####"))
 
   kinesis_parameters$dataCols <- c("subjName","frameN", "time","deltaTime","trialN")
 }
