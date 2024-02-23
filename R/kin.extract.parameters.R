@@ -3,8 +3,8 @@ kin.extract.parameters <- function(data, signals, grasp = F)
 {
   tryCatch(
     {
-      signalsCols <- c(paste0(signals, rep(c("X","Y","Z","Vel","Acc"), length(signals))),
-                       paste0(signals, rep(paste0(c("X","Y","Z"), "vel"), length(signals))))
+      signalsCols <- c(paste0(signals, rep(c("X","Y","Z","Vel","Acc"), each = length(signals))),
+                       paste0(signals, rep(paste0(c("X","Y","Z"), "vel"), each = length(signals))))
       timeColName <- kinesis_parameters$dataCols[3]
       temp <- data[c(timeColName,signalsCols)]
 
