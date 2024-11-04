@@ -1,6 +1,32 @@
-# functions to fix dataset
+#' Kinematic Data Processing Functions
+#' 
+#' @description
+#' A collection of functions for processing and fixing kinematic datasets, particularly
+#' focused on motion capture data with finger tracking.
+#'
+#' @details
+#' Functions included in this collection:
+#' \itemize{
+#'   \item \code{kin.trialN}: Ensures trial numbers start from 1
+#'   \item \code{kin.frameN}: Creates frame counters within trials
+#'   \item \code{kin.fingersOccluded}: Flags frames where fingers are occluded
+#'   \item \code{kin.framesOccluded}: Counts consecutive occluded frames
+#'   \item \code{kin.time}: Converts frame numbers to time based on refresh rate
+#'   \item \code{kin.globalTime}: Calculates global time across all trials
+#'   \item \code{kin.signal.missing}: Identifies missing or static signal frames
+#' }
+#'
+#' @name functions_dataset_fix
+#' @docType package
+NULL
 
-# kin.trialN: trialN from 1 to N ----
+#' Fix Trial Numbers
+#' 
+#' @description
+#' Ensures trial numbers start from 1 by adding 1 to all trial numbers if any are 0.
+#' 
+#' @param dataset A data frame containing kinematic data
+#' @return A data frame with corrected trial numbers
 #' @export
 kin.trialN <- function(dataset)
 {
@@ -21,7 +47,13 @@ kin.trialN <- function(dataset)
   return(dataset)
 }
 
-# kin.frameN: frames counter ----
+#' Create Frame Counter
+#' 
+#' @description
+#' Creates sequential frame numbers within each trial.
+#' 
+#' @param dataset A data frame containing kinematic data
+#' @return A data frame with added frame numbers
 #' @export
 kin.frameN <- function(dataset)
 {
@@ -32,7 +64,13 @@ kin.frameN <- function(dataset)
   return(dataset)
 }
 
-# kin.fingersOccluded: flag the frames where either of the two fingers is invisible ----
+#' Flag Occluded Fingers
+#' 
+#' @description
+#' Identifies frames where either finger marker is occluded based on position changes.
+#' 
+#' @param dataset A data frame containing kinematic data with raw finger positions
+#' @return A data frame with occluded frames flagged and NA values for occluded positions
 #' @export
 kin.fingersOccluded <- function(dataset)
 {
@@ -58,7 +96,13 @@ kin.fingersOccluded <- function(dataset)
   return(dataset)
 }
 
-# kin.framesOccluded: incremental counter of occluded frames within each trial ----
+#' Count Occluded Frames
+#' 
+#' @description
+#' Creates an incremental counter of consecutive occluded frames within each trial.
+#' 
+#' @param dataset A data frame containing kinematic data with fingersOccluded column
+#' @return A data frame with added framesOccluded counter
 #' @export
 kin.framesOccluded <- function(dataset)
 {
@@ -66,7 +110,15 @@ kin.framesOccluded <- function(dataset)
   return(dataset)
 }
 
-# kin.time: multiplies each frame by a constant equal to the (nominal) refresh rate of the screen (Warning: this is just an artificial fix, actual refresh rate is variable - always make sure that actual time steps are in the original output file) ----
+#' Convert Frames to Time
+#' 
+#' @description
+#' Converts frame numbers to time based on screen refresh rate.
+#' 
+#' @param dataset A data frame containing kinematic data
+#' @param refreshRate Nominal refresh rate of the screen in Hz (default: 85)
+#' @param time.unit Time unit conversion factor (default: 1)
+#' @return A data frame with added time column
 #' @export
 kin.time <- function(dataset, refreshRate = 85, time.unit = 1)
 {
@@ -78,7 +130,13 @@ kin.time <- function(dataset, refreshRate = 85, time.unit = 1)
   return(dataset)
 }
 
-# kin.globalTime ----
+#' Calculate Global Time
+#' 
+#' @description
+#' Calculates global time across all trials based on median frame duration.
+#' 
+#' @param dataset A data frame containing kinematic data with time column
+#' @return A data frame with added globalTime column
 #' @export
 kin.globalTime <- function(dataset)
 {
@@ -92,7 +150,15 @@ kin.globalTime <- function(dataset)
   return(dataset)
 }
 
-# kin.missing.frames
+#' Identify Missing Signals
+#' 
+#' @description
+#' Identifies missing or static signals in kinematic data.
+#' 
+#' @param x A numeric vector containing signal data
+#' @param criterion Values to be considered as missing (default: NULL)
+#' @param delete.static.positions If TRUE, marks unchanging positions as missing (default: FALSE)
+#' @return A vector with missing values marked as NA
 #' @export
 kin.signal.missing <- function(x, criterion=NULL, delete.static.positions = F)
 {

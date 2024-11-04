@@ -32,6 +32,16 @@ kin.rescale <- function(x,a,b) {
   rescale(x, to = rg, from = range(x, na.rm = TRUE)) }
 
 # kin.smooth.repair ----
+#' Smooth and repair kinematic data by interpolating missing values
+#' @description This function smooths kinematic data and repairs gaps in the signal by interpolating
+#' missing values, but only if the gaps are smaller than a specified maximum number of frames.
+#' @param x Numeric vector containing the time or frame indices
+#' @param y.raw Numeric vector containing the raw kinematic data to be smoothed and repaired
+#' @param lam Smoothing parameter lambda (default: 1e-18)
+#' @param maxFrames Maximum number of consecutive frames that can be interpolated (default: 18)
+#' @param fingersOccluded Binary vector indicating which frames contain occluded fingers (1) or not (0)
+#' @param framesOccluded Numeric vector containing the count of consecutive occluded frames
+#' @return A numeric vector containing the smoothed and repaired kinematic data
 #' @export
 kin.smooth.repair <- function(x, y.raw, lam = 1e-18, maxFrames = 18, fingersOccluded, framesOccluded)
 {
@@ -84,7 +94,13 @@ kin.smooth.repair <- function(x, y.raw, lam = 1e-18, maxFrames = 18, fingersOccl
   }
 }
 
-# kin.signal.repair ----
+#' Repair kinematic signal by interpolating missing values
+#' @description This function analyzes a kinematic signal for missing values (NAs) and repairs gaps
+#' in the signal through interpolation, but only if the gaps are smaller than a specified maximum
+#' number of frames.
+#' @param y.raw Numeric vector containing the raw kinematic data to be repaired
+#' @param maxFrames Maximum number of consecutive frames that can be interpolated (default: 18)
+#' @return A numeric vector containing the repaired kinematic data
 #' @export
 kin.signal.repair <- function(y.raw, maxFrames = 18)
 {

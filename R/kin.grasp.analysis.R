@@ -1,3 +1,40 @@
+#' Kinematic Analysis of Grasping Movements
+#'
+#' @description
+#' Analyzes 3D kinematic data of grasping movements by calculating various parameters including
+#' grip aperture, grip position, grip velocity, grip acceleration, and grip orientation angles.
+#'
+#' @param data A data frame containing the kinematic data
+#' @param signals A vector of marker names (e.g., c("index", "thumb"))
+#' @param splinepar Smoothing parameter for the spline filter (default = 5e-2)
+#' @param ... Additional arguments passed to internal functions
+#'
+#' @return A data frame containing the following columns:
+#' \itemize{
+#'   \item deltaTime: Time values from the input data
+#'   \item GA: Grip aperture (3D Euclidean distance between index and thumb)
+#'   \item GPX, GPY, GPZ: 3D grip position coordinates
+#'   \item GPXvel, GPYvel, GPZvel: Velocity components in each dimension
+#'   \item GPVel: Overall grip velocity magnitude
+#'   \item GPAcc: Grip acceleration
+#'   \item GOF: Grip orientation in the frontal (coronal) plane
+#'   \item GOT: Grip orientation in the transverse plane
+#'   \item GOS: Grip orientation in the sagittal plane
+#' }
+#'
+#' @details
+#' The function calculates:
+#' - Grip aperture as the 3D Euclidean distance between two markers (typically index and thumb)
+#' - Grip position as the midpoint between the two markers
+#' - Grip velocity and acceleration using smoothing spline filtering
+#' - Grip orientation angles in three anatomical planes
+#'
+#' @examples
+#' \dontrun{
+#' data <- read.csv("kinematic_data.csv")
+#' results <- kin.grasp.analysis(data, signals = c("index", "thumb"))
+#' }
+#'
 #' @export
 kin.grasp.analysis <- function(data, signals, splinepar = 5e-2, ...)
 {

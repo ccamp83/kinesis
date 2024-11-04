@@ -1,4 +1,33 @@
-# kin.find.traj.landmark
+#' Find Landmark Frame in Trajectory Data
+#' 
+#' @description
+#' Identifies a landmark frame in trajectory data based on a specified condition.
+#' Returns the first frame of the longest consecutive sequence where the condition is met.
+#' 
+#' @param condition A character string containing an R expression that evaluates to a logical vector.
+#'                  The expression should reference variables in the current environment.
+#' 
+#' @return An integer representing the landmark frame number, or NA if no landmark is found
+#'         or if an error occurs during execution.
+#' 
+#' @details
+#' The function works by:
+#' 1. Evaluating the provided condition
+#' 2. Finding consecutive sequences where the condition is TRUE
+#' 3. Identifying the longest such sequence
+#' 4. Returning the first frame of that sequence
+#' 
+#' @examples
+#' \dontrun{
+#' # Example with velocity data
+#' velocity <- c(0.1, 0.2, 0.5, 0.7, 0.8, 0.9, 0.7, 0.4, 0.2)
+#' landmark <- kin.find.traj.landmark("velocity > 0.5")
+#' 
+#' # Example with position data
+#' position <- c(1, 2, 5, 8, 10, 12, 13, 14, 15)
+#' landmark <- kin.find.traj.landmark("position > 10")
+#' }
+#' 
 #' @export
 kin.find.traj.landmark <- function(condition)
 {

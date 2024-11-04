@@ -2,10 +2,30 @@
 % Please edit documentation in R/kin.sgFilter.r
 \name{kin.sgFilter}
 \alias{kin.sgFilter}
-\title{apply Savitzky-Golay filter}
+\title{Apply Savitzky-Golay Filter}
 \usage{
 kin.sgFilter(x, p = 4, m = 0, ts = 1)
 }
+\arguments{
+\item{x}{Numeric vector to be filtered}
+
+\item{p}{Integer indicating the order of the polynomial used to fit the data (default: 4)}
+
+\item{m}{Integer indicating the order of derivatives to calculate (default: 0)}
+
+\item{ts}{Numeric value for the sampling interval (default: 1)}
+}
+\value{
+A numeric vector of the same length as the input, containing the filtered values
+}
 \description{
-This function is a wrapper for signal::sgolayfilt with a modification to handle NAs
+Applies a Savitzky-Golay smoothing filter to a numeric vector, with built-in handling for NA values.
+This function wraps the sgolayfilt function from the 'signal' package.
+}
+\examples{
+\dontrun{
+data <- c(1, 2, NA, 4, 5, 6)
+filtered_data <- kin.sgFilter(data)
+}
+
 }

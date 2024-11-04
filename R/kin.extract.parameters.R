@@ -1,10 +1,60 @@
+#' Extract Kinematic Parameters from Movement Data
+#'
+#' @description
+#' Extracts various kinematic parameters from 3D movement data, including temporal,
+#' spatial, and dynamic measures for both reaching and grasping movements.
+#'
+#' @param data A data frame containing movement data with time series information
+#' @param signals Character vector specifying the signal names to analyze
+#' @param grasp Logical value indicating whether to analyze grasping parameters (default: FALSE)
+#'
+#' @return A list containing:
+#' \itemize{
+#'   \item time_info: Data frame with movement onset, offset, and total movement time
+#'   \item reach_parameters: Data frame with reaching kinematics including:
+#'     \itemize{
+#'       \item Final positions (FX, FY, FZ)
+#'       \item Final velocities (FXVel, FYVel, FZVel, FVel)
+#'       \item Peak dynamics (MVel, MAcc, MDec)
+#'       \item Timing measures (timeMVel, timeMAcc, timeMDec)
+#'       \item Path characteristics (pathLength, Xmax, Ymax, Zmax)
+#'       \item Temporal measures (timeToXmax, timeToYmax, timeToZmax)
+#'       \item Movement complexity (XlocMinN, YlocMinN, ZlocMinN, XlocMaxN, YlocMaxN, ZlocMaxN)
+#'     }
+#'   \item grasp_parameters: (If grasp=TRUE) Data frame with grasping kinematics including:
+#'     \itemize{
+#'       \item All reaching parameters
+#'       \item Grip aperture measures (FGA, MGA)
+#'       \item Grip timing measures (timeMGA, timeMVelToMGA, timeMGAToMDec)
+#'       \item Grip orientation measures (FGOf, FGOt, FGOs)
+#'     }
+#' }
+#'
+#' @details
+#' The function processes 3D movement data to extract comprehensive kinematic parameters.
+#' It handles both reaching movements (default) and optionally grasping movements.
+#' Time measures are normalized to movement onset. The function includes error handling
+#' through tryCatch and returns NA if processing fails.
+#'
+#' @examples
+#' \dontrun{
+#' # Extract reaching parameters
+#' reach_data <- kin.extract.parameters(movement_data, signals = c("hand"))
+#'
+#' # Extract both reaching and grasping parameters
+#' grasp_data <- kin.extract.parameters(movement_data, signals = c("hand"), grasp = TRUE)
+#' }
+#'
+#' @seealso
+#' \code{\link{kin.signal.arclength}} for path length calculations
+#'
 #' @export
 kin.extract.parameters <- function(data, signals, grasp = F)
 {
   tryCatch(
     {
-      signalsCols <- c(paste0(signals, rep(c("X","Y","Z","Vel","Acc"), each = length(signals))),
-                       paste0(signals, rep(paste0(c("X","Y","Z"), "vel"), each = length(signals))))
+      signalsCols <- c(paste0(signals, rep(c("X","Y","Z","Vel","Acc"), length(signals))),
+                       paste0(signals, rep(paste0(c("X","Y","Z"), "vel"), length(signals))))
       timeColName <- kinesis_parameters$dataCols[3]
       temp <- data[c(timeColName,signalsCols)]
 
