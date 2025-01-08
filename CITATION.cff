@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Campagnoli"
+    given-names: "Carlo"
+    email: "c.campagnoli@leeds.ac.uk"
+    orcid: "0000-0002-9794-4475"
+title: "kinesis: R package for the analysis of motion trajectories and movement kinematics"
+version: "5.1.0"
+date-released: "2024-11-04"
+license: MIT
+repository-code: "https://github.com/ccampagnoli/kinesis"
+type: software
