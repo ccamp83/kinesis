@@ -12,6 +12,31 @@ devtools::install_github("ccamp83/kinesis")
 library(kinesis)
 ```
 
+## Package Structure
+The package is organized into several functional groups:
+
+1. **Data Preparation**
+   - `kin.getDataCols()` and `kin.setDataCols()`: Manage column names
+   - `data.check()`: Validate and prepare datasets
+
+2. **Signal Processing**
+   - `kin.signal.analysis()`: Main preprocessing pipeline
+   - Filter functions: `kin.bwFilter()`, `kin.sgFilter()`, `kin.ssFilter()`
+   - `kin.signal.curvature()` and `kin.signal.arclength()`: Geometric analysis
+
+3. **Grasp Analysis**
+   - `kin.grasp.analysis()`: Analyze grip aperture and orientation
+   - `kin.generate.trajectory()`: Generate synthetic trajectories
+
+4. **Feature Extraction**
+   - `kin.find.traj.landmark()`: Identify movement landmarks
+   - `kin.extract.parameters()`: Extract kinematic features
+
+5. **Visualization** (New!)
+   - `kin.plot.trajectory()`: Visualize 3D trajectories
+   - `kin.plot.velocity()`: Plot velocity profiles
+   - `kin.plot.grasp()`: Visualize grip aperture
+
 ## Preparing the dataset
 The kinesis package expects a dataset in long format, containing at minimum the following five columns: 
 
@@ -136,4 +161,33 @@ The procedure for kinematic features extraction follows these steps:
 |  | FGOf (final grip orientation on the frontoparallel plane, in rad) |
 |  | FGOt (final grip orientation on the transverse plane, in rad) |
 |  | FGOs (final grip orientation on the sagittal plane, in rad) |
+
+## Batch Processing
+For analyzing multiple trials or participants, use the batch processing functions:
+
+```{r}
+# Process multiple trials in parallel
+kin.batch.process(data, 
+                 start_positions,
+                 end_positions,
+                 refresh_rate = 1/120,
+                 n_cores = parallel::detectCores() - 1)
+
+# Export results to various formats
+kin.export.results(results, format = "csv")  # or "json", "excel"
+```
+
+## Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Citation
+If you use this package in your research, please cite:
+```
+@software{kinesis2024,
+  author = {Camp, Carlo},
+  title = {kinesis: R package for kinematic trajectory analysis},
+  year = {2024},
+  url = {https://github.com/ccamp83/kinesis}
+}
+```
 
