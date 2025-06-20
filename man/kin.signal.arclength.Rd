@@ -18,9 +18,11 @@ using Savitzky-Golay filtered derivatives.
 }
 \details{
 The function computes the arc length by:
-1. Calculating derivatives using Savitzky-Golay filtering for each dimension
-2. Computing the Euclidean distance between consecutive points
-3. Calculating the cumulative sum of these distances
+\enumerate{
+\item Calculating derivatives using Savitzky-Golay filtering for each dimension
+\item Computing the Euclidean distance between consecutive points
+\item Calculating the cumulative sum of these distances
+}
 }
 \examples{
 xyz_data <- matrix(rnorm(300), ncol=3)

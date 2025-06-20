@@ -2,6 +2,8 @@
 % Please edit documentation in R/functions_dataset_fix.r
 \docType{package}
 \name{functions_dataset_fix}
+\alias{kinesis}
+\alias{kinesis-package}
 \alias{functions_dataset_fix}
 \title{Kinematic Data Processing Functions}
 \description{
@@ -11,12 +13,12 @@ focused on motion capture data with finger tracking.
 \details{
 Functions included in this collection:
 \itemize{
-  \item \code{kin.trialN}: Ensures trial numbers start from 1
-  \item \code{kin.frameN}: Creates frame counters within trials
-  \item \code{kin.fingersOccluded}: Flags frames where fingers are occluded
-  \item \code{kin.framesOccluded}: Counts consecutive occluded frames
-  \item \code{kin.time}: Converts frame numbers to time based on refresh rate
-  \item \code{kin.globalTime}: Calculates global time across all trials
-  \item \code{kin.signal.missing}: Identifies missing or static signal frames
+\item \code{kin.trialN}: Ensures trial numbers start from 1
+\item \code{kin.frameN}: Creates frame counters within trials
+\item \code{kin.fingersOccluded}: Flags frames where fingers are occluded
+\item \code{kin.framesOccluded}: Counts consecutive occluded frames
+\item \code{kin.time}: Converts frame numbers to time based on refresh rate
+\item \code{kin.globalTime}: Calculates global time across all trials
+\item \code{kin.signal.missing}: Identifies missing or static signal frames
 }
 }

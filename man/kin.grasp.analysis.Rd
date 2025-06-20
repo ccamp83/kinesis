@@ -18,15 +18,15 @@ kin.grasp.analysis(data, signals, splinepar = 0.05, ...)
 \value{
 A data frame containing the following columns:
 \itemize{
-  \item deltaTime: Time values from the input data
-  \item GA: Grip aperture (3D Euclidean distance between index and thumb)
-  \item GPX, GPY, GPZ: 3D grip position coordinates
-  \item GPXvel, GPYvel, GPZvel: Velocity components in each dimension
-  \item GPVel: Overall grip velocity magnitude
-  \item GPAcc: Grip acceleration
-  \item GOF: Grip orientation in the frontal (coronal) plane
-  \item GOT: Grip orientation in the transverse plane
-  \item GOS: Grip orientation in the sagittal plane
+\item deltaTime: Time values from the input data
+\item GA: Grip aperture (3D Euclidean distance between index and thumb)
+\item GPX, GPY, GPZ: 3D grip position coordinates
+\item GPXvel, GPYvel, GPZvel: Velocity components in each dimension
+\item GPVel: Overall grip velocity magnitude
+\item GPAcc: Grip acceleration
+\item GOF: Grip orientation in the frontal (coronal) plane
+\item GOT: Grip orientation in the transverse plane
+\item GOS: Grip orientation in the sagittal plane
 }
 }
 \description{
@@ -35,10 +35,12 @@ grip aperture, grip position, grip velocity, grip acceleration, and grip orienta
 }
 \details{
 The function calculates:
-- Grip aperture as the 3D Euclidean distance between two markers (typically index and thumb)
-- Grip position as the midpoint between the two markers
-- Grip velocity and acceleration using smoothing spline filtering
-- Grip orientation angles in three anatomical planes
+\itemize{
+\item Grip aperture as the 3D Euclidean distance between two markers (typically index and thumb)
+\item Grip position as the midpoint between the two markers
+\item Grip velocity and acceleration using smoothing spline filtering
+\item Grip orientation angles in three anatomical planes
+}
 }
 \examples{
 \dontrun{

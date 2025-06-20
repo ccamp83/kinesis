@@ -16,24 +16,24 @@ kin.extract.parameters(data, signals, grasp = F)
 \value{
 A list containing:
 \itemize{
-  \item time_info: Data frame with movement onset, offset, and total movement time
-  \item reach_parameters: Data frame with reaching kinematics including:
-    \itemize{
-      \item Final positions (FX, FY, FZ)
-      \item Final velocities (FXVel, FYVel, FZVel, FVel)
-      \item Peak dynamics (MVel, MAcc, MDec)
-      \item Timing measures (timeMVel, timeMAcc, timeMDec)
-      \item Path characteristics (pathLength, Xmax, Ymax, Zmax)
-      \item Temporal measures (timeToXmax, timeToYmax, timeToZmax)
-      \item Movement complexity (XlocMinN, YlocMinN, ZlocMinN, XlocMaxN, YlocMaxN, ZlocMaxN)
-    }
-  \item grasp_parameters: (If grasp=TRUE) Data frame with grasping kinematics including:
-    \itemize{
-      \item All reaching parameters
-      \item Grip aperture measures (FGA, MGA)
-      \item Grip timing measures (timeMGA, timeMVelToMGA, timeMGAToMDec)
-      \item Grip orientation measures (FGOf, FGOt, FGOs)
-    }
+\item time_info: Data frame with movement onset, offset, and total movement time
+\item reach_parameters: Data frame with reaching kinematics including:
+\itemize{
+\item Final positions (FX, FY, FZ)
+\item Final velocities (FXVel, FYVel, FZVel, FVel)
+\item Peak dynamics (MVel, MAcc, MDec)
+\item Timing measures (timeMVel, timeMAcc, timeMDec)
+\item Path characteristics (pathLength, Xmax, Ymax, Zmax)
+\item Temporal measures (timeToXmax, timeToYmax, timeToZmax)
+\item Movement complexity (XlocMinN, YlocMinN, ZlocMinN, XlocMaxN, YlocMaxN, ZlocMaxN)
+}
+\item grasp_parameters: (If grasp=TRUE) Data frame with grasping kinematics including:
+\itemize{
+\item All reaching parameters
+\item Grip aperture measures (FGA, MGA)
+\item Grip timing measures (timeMGA, timeMVelToMGA, timeMGAToMDec)
+\item Grip orientation measures (FGOf, FGOt, FGOs)
+}
 }
 }
 \description{

@@ -12,7 +12,7 @@ The expression should reference variables in the current environment.}
 }
 \value{
 An integer representing the landmark frame number, or NA if no landmark is found
-        or if an error occurs during execution.
+or if an error occurs during execution.
 }
 \description{
 Identifies a landmark frame in trajectory data based on a specified condition.
@@ -20,10 +20,12 @@ Returns the first frame of the longest consecutive sequence where the condition 
 }
 \details{
 The function works by:
-1. Evaluating the provided condition
-2. Finding consecutive sequences where the condition is TRUE
-3. Identifying the longest such sequence
-4. Returning the first frame of that sequence
+\enumerate{
+\item Evaluating the provided condition
+\item Finding consecutive sequences where the condition is TRUE
+\item Identifying the longest such sequence
+\item Returning the first frame of that sequence
+}
 }
 \examples{
 \dontrun{

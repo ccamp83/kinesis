@@ -11,8 +11,8 @@ kin.signal.curvature(data, deltaTime, normalize = T)
 
 \item{deltaTime}{Numeric value representing the time interval between samples}
 
-\item{normalize}{Logical value indicating whether to normalize the curvature values 
-to a range of [0,1] (default: TRUE)}
+\item{normalize}{Logical value indicating whether to normalize the curvature values
+to a range of \link{0,1} (default: TRUE)}
 }
 \value{
 A numeric vector containing the calculated curvature values. If normalize=TRUE,

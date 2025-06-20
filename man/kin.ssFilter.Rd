@@ -11,7 +11,7 @@ kin.ssFilter(x, y, x2 = NULL, spar = 0.05, deriv = 0)
 
 \item{y}{Numeric vector containing the y-coordinates of the input signal}
 
-\item{x2}{Optional numeric vector of x-coordinates where predictions should be made. 
+\item{x2}{Optional numeric vector of x-coordinates where predictions should be made.
 If NULL (default), predictions are made at the input x-coordinates}
 
 \item{spar}{Smoothing parameter, typically in (0,1]. Default is 0.05}
@@ -25,9 +25,9 @@ A numeric vector containing the smoothed signal values
 Applies smoothing spline filtering to a signal using \code{smooth.spline}.
 }
 \details{
-This function applies smoothing spline filtering to a signal using base R's 
-\code{smooth.spline} function. The smoothing parameter \code{spar} controls 
-the trade-off between smoothness and goodness of fit, with larger values 
+This function applies smoothing spline filtering to a signal using base R's
+\code{smooth.spline} function. The smoothing parameter \code{spar} controls
+the trade-off between smoothness and goodness of fit, with larger values
 producing smoother results.
 }
 \examples{

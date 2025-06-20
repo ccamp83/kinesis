@@ -18,6 +18,6 @@ Rotate trajectory
 The trajectory is assumed to start at origin (0,0,0)
 and terminate at a point (0,0,z)
 with x axis: rightwards positive, leftwards negative
-     y axis: upwards positive, downwards negative
-     z axis: forwards positive, backwards negative
+y axis: upwards positive, downwards negative
+z axis: forwards positive, backwards negative
 }

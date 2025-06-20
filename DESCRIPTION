@@ -1,7 +1,7 @@
 Package: kinesis
 Type: Package
 Title: R package for analyzing kinematic trajectories of reaching and grasping movements.
-Version: 5.1.1
+Version: 5.1.2
 Date: 16 Jun 2025
 Author: Carlo Campagnoli
 Maintainer: Carlo Campagnoli <c.campagnoli@leeds.ac.uk>
@@ -10,7 +10,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Imports: 
     ggplot2,
     plotly,
