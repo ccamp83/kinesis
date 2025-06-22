@@ -17,7 +17,6 @@
 #' }
 #'
 #' @name functions_dataset_fix
-#' @docType package
 NULL
 
 #' Fix Trial Numbers
