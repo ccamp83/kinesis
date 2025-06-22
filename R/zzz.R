@@ -1,19 +1,22 @@
+.kinesis_env <- new.env(parent = emptyenv())
+
 .onLoad <- function(libname, pkgname)
 {
-  assign("kinesis_parameters", new.env(), .GlobalEnv)
+  .kinesis_env$dataCols <- c("subjName","frameN", "time","deltaTime","trialN")
   libraries()
 }
 
 .onAttach <- function(libname, pkgname)
 {
-  descriptionfile <- system.file("DESCRIPTION", package = "kinesis")
+  descriptionfile <- system.file("DESCRIPTION", package = pkgname)
   descfile <- desc::desc(descriptionfile)
-
-  packageStartupMessage(paste0("#### KINESIS v",
-                               installed.packages()['kinesis','Version'],
+  ver <- tryCatch(
+    as.character(utils::packageVersion(pkgname)),
+    error = function(e) "unknown"
+  )
+  packageStartupMessage(paste0("#### ", pkgname, " v",
+                               ver,
                                " 'Mambo' | ",
                                descfile$get_field("Date"),
                                " ####"))
-
-  kinesis_parameters$dataCols <- c("subjName","frameN", "time","deltaTime","trialN")
 }

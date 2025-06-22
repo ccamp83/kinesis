@@ -56,10 +56,11 @@ kin.trialN <- function(dataset)
 #' @export
 kin.frameN <- function(dataset)
 {
+  dataCols <- .kinesis_env$dataCols
   dataset <- eval(substitute(
     ddply(dataset, .(trialN), mutate, frameN=seq(1:length(trialN)))
-    , list(trialN = as.name(kinesis_parameters$dataCols[5]))))
-  names(dataset)[names(dataset) == "frameN"] <- kinesis_parameters$dataCols[2]
+    , list(trialN = as.name(dataCols[5]))))
+  names(dataset)[names(dataset) == "frameN"] <- dataCols[2]
   return(dataset)
 }
 
@@ -82,16 +83,15 @@ kin.fingersOccluded <- function(dataset)
                     thumbXraw = ifelse(thumbVisibility<0.000001,NA,thumbXraw),
                     thumbYraw = ifelse(thumbVisibility<0.000001,NA,thumbYraw),
                     thumbZraw = ifelse(thumbVisibility<0.000001,NA,thumbZraw),
-                    fingersOccluded=ifelse(indexVisibility*thumbVisibility<0.000001,1,0) # if the increment is exactly zero, two frames have exactly the same coordinate, which means that the marker was not recorded
+                    fingersOccluded=ifelse(indexVisibility*thumbVisibility<0.000001,1,0)
   )
-  # update fingers raw coords
   dataset$indexXraw <- datatemp$indexXraw
   dataset$indexYraw <- datatemp$indexYraw
   dataset$indexZraw <- datatemp$indexZraw
   dataset$thumbXraw <- datatemp$thumbXraw
   dataset$thumbYraw <- datatemp$thumbYraw
   dataset$thumbZraw <- datatemp$thumbZraw
-  dataset$fingersOccluded <- ifelse(is.na(datatemp$fingersOccluded), 1,  datatemp$fingersOccluded) # drop index- and thumbVisibility and include only fingersOccluded
+  dataset$fingersOccluded <- ifelse(is.na(datatemp$fingersOccluded), 1,  datatemp$fingersOccluded)
   return(dataset)
 }
 
@@ -121,11 +121,14 @@ kin.framesOccluded <- function(dataset)
 #' @export
 kin.time <- function(dataset, refreshRate = 85, time.unit = 1)
 {
+  dataCols <- .kinesis_env$dataCols
   dataset <- eval(substitute(
-    ddply(dataset, .(trialN), mutate, time = frameN * kinesis_parameters$time.unit / kinesis_parameters$refreshRate)
-    , list(trialN = as.name(kinesis_parameters$dataCols[5]),
-           frameN = as.name(kinesis_parameters$dataCols[2]))))
-  names(dataset)[names(dataset) == "time"] <- kinesis_parameters$dataCols[3]
+    ddply(dataset, .(trialN), mutate, time = frameN * time_unit / refresh_rate)
+    , list(trialN = as.name(dataCols[5]),
+           frameN = as.name(dataCols[2]),
+           time_unit = time.unit,
+           refresh_rate = refreshRate)))
+  names(dataset)[names(dataset) == "time"] <- dataCols[3]
   return(dataset)
 }
 
@@ -139,13 +142,8 @@ kin.time <- function(dataset, refreshRate = 85, time.unit = 1)
 #' @export
 kin.globalTime <- function(dataset)
 {
-  millisecPerFrame = median(diff(dataset$time))
-  # assign millisecPerFrame to global environment for looping (temporarily)
-  assign("millisecPerFrame", millisecPerFrame, envir = .GlobalEnv)
-  dataset <- ddply(dataset, .(trialN), mutate, globalTime = frameN*millisecPerFrame)
-  # remove millisecPerFrame from global environment
-  remove(millisecPerFrame, envir = .GlobalEnv)
-
+  millisecPerFrame <- median(diff(dataset$time), na.rm = TRUE)
+  dataset <- ddply(dataset, .(trialN), mutate, globalTime = frameN * millisecPerFrame)
   return(dataset)
 }
 

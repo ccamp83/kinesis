@@ -1,7 +1,7 @@
 Package: kinesis
 Type: Package
 Title: R package for analyzing kinematic trajectories of reaching and grasping movements.
-Version: 5.1.2
+Version: 5.2.2
 Date: 22 Jun 2025
 Author: Carlo Campagnoli
 Maintainer: Carlo Campagnoli <c.campagnoli@leeds.ac.uk>

@@ -55,7 +55,7 @@ kin.extract.parameters <- function(data, signals, grasp = F)
     {
       signalsCols <- c(paste0(signals, rep(c("X","Y","Z","Vel","Acc"), length(signals))),
                        paste0(signals, rep(paste0(c("X","Y","Z"), "vel"), length(signals))))
-      timeColName <- kinesis_parameters$dataCols[3]
+      timeColName <- .kinesis_env$dataCols[3]
       temp <- data[c(timeColName,signalsCols)]
 
       time_info <- eval(substitute(

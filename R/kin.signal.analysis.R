@@ -25,7 +25,7 @@ kin.signal.analysis <- function(signal, signal.name = "signal", start = c(0,0,0)
   tryCatch(
     {
       # check that time column is present
-      timeColName <- kinesis_parameters$dataCols[3]
+      timeColName <- .kinesis_env$dataCols[3]
       hasTimeCol <- timeColName %in% names(signal)
       if(!hasTimeCol)
       {
